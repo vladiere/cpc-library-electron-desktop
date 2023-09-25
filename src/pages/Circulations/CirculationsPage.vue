@@ -27,6 +27,14 @@
         <q-tab-panel name="finesfees">
           <FinesAndFees />
         </q-tab-panel>
+
+        <q-tab-panel name="borrows">
+          <Borrow />
+        </q-tab-panel>
+
+        <q-tab-panel name="renewal">
+          <Renewal />
+        </q-tab-panel>
       </q-tab-panels>
     </div>
   </q-page>
@@ -37,6 +45,8 @@ import { defineComponent, ref } from 'vue';
 import Reservations from 'src/components/Circulations/ReservationComponent.vue';
 import Holds from 'src/components/Circulations/HoldsComponent.vue';
 import FinesAndFees from 'src/components/Circulations/FinesAndFeesComponent.vue';
+import Borrow from 'src/components/Circulations/BorrowComponent.vue';
+import Renewal from 'src/components/Circulations/RenewalComponent.vue';
 
 defineComponent({
   name: 'CirculationsPage',

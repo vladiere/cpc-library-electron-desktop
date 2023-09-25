@@ -31,51 +31,16 @@
               label="notifications"
               flat
               icon="fa-regular fa-bell"
+              dropdown-icon="mdi-chevron-down"
             >
-              <q-list dense bordered>
-                <q-item clickable v-close-popup>
-                  <q-item-section>
-                    <q-item-label>Single line item</q-item-label>
-                    <q-item-label caption lines="2"
-                      >Secondary line text. Lorem ipsum dolor sit amet,
-                      consectetur adipiscit elit.</q-item-label
-                    >
-                  </q-item-section>
-
-                  <q-item-section side top>
-                    <q-item-label caption>5 min ago</q-item-label>
-                    <q-icon name="star" color="yellow" />
-                  </q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup>
-                  <q-item-section>
-                    <q-item-label>Single line item</q-item-label>
-                    <q-item-label caption lines="2"
-                      >Secondary line text. Lorem ipsum dolor sit amet,
-                      consectetur adipiscit elit.</q-item-label
-                    >
-                  </q-item-section>
-
-                  <q-item-section side top>
-                    <q-item-label caption>5 min ago</q-item-label>
-                    <q-icon name="star" color="yellow" />
-                  </q-item-section>
-                </q-item>
-                <q-item clickable v-close-popup>
-                  <q-item-section>
-                    <q-item-label>Single line item</q-item-label>
-                    <q-item-label caption lines="2"
-                      >Secondary line text. Lorem ipsum dolor sit amet,
-                      consectetur adipiscit elit.</q-item-label
-                    >
-                  </q-item-section>
-
-                  <q-item-section side top>
-                    <q-item-label caption>5 min ago</q-item-label>
-                    <q-icon name="star" color="yellow" />
-                  </q-item-section>
-                </q-item>
-              </q-list>
+              <q-virtual-scroll
+                style="max-height: 300px; overflow-x: hidden"
+                :items="notifications"
+                separator
+                v-slot="{ item, index }"
+              >
+                <ListNotifications :key="index" v-bind="item" />
+              </q-virtual-scroll>
             </q-btn-dropdown>
           </div>
           <div class="row items-center q-gutter-x-xs cursor-pointer">
@@ -136,6 +101,9 @@ import appLogo from 'src/assets/applogo.png';
 import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
+import ListNotifications, {
+  NotificationsProps,
+} from 'src/components/Notify/ListNotifications.vue';
 
 const route = useRoute();
 const routeName = ref<unknown>('');
@@ -210,12 +178,73 @@ const getLibrarianDetails = async () => {
     });
 
     librarianStore.initLibrarian(response.data[0]);
-
-    console.log(response.data[0]);
   } catch (error: any) {
     throw new Error(error);
   }
 };
+
+const notifications: NotificationsProps[] = [
+  {
+    id: 1,
+    fullname: 'John Doe',
+    message: 'You have a new message.',
+    time: 'now',
+    status: 'unread',
+  },
+  {
+    id: 2,
+    fullname: 'Alice Smith',
+    message: 'Meeting at 3 PM.',
+    time: '1 hour ago',
+    status: 'read',
+  },
+  {
+    id: 3,
+    fullname: 'Bob Johnson',
+    message: "Don't forget to submit your report.",
+    time: '2 hours ago',
+    status: 'unread',
+  },
+  {
+    id: 4,
+    fullname: 'Emily Brown',
+    message: 'New project updates.',
+    time: '3 hours ago',
+    status: 'read',
+  },
+  {
+    id: 5,
+    fullname: 'Michael Lee',
+    message: 'Lunch with the team tomorrow.',
+    time: '1 day ago',
+    status: 'read',
+  },
+  {
+    id: 6,
+    fullname: 'Sarah Wilson',
+    message: 'Reminder: Weekly standup meeting.',
+    time: '2 days ago',
+    status: 'unread',
+  },
+  {
+    id: 7,
+    fullname: 'Dphyr',
+    message: 'Borrowing the books of us.',
+    time: '1 week ago',
+    status: 'unread',
+  },
+];
+
+// Sort the notifications based on the "status" property
+notifications.sort((a, b) => {
+  // Convert status values to lowercase for case-insensitive sorting
+  const statusA = a.status.toLowerCase();
+  const statusB = b.status.toLowerCase();
+
+  if (statusA < statusB) return 1;
+  if (statusA > statusB) return -1;
+  return 0;
+});
 
 onMounted(() => {
   getLibrarianDetails();

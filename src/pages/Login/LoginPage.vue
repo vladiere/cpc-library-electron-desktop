@@ -55,7 +55,7 @@
             />
           </template>
         </q-input>
-        <q-btn label="login" color="primary" type="submit" />
+        <q-btn label="login" :loading="loading" color="primary" type="submit" />
         <q-btn label="reset" icon="mdi-sync" flat type="reset" />
       </q-form>
     </div>
@@ -79,8 +79,11 @@ const form = ref({
 });
 const isPwd = ref(true);
 const router = useRouter();
+const loading = ref(false);
 
 const handleSubmit = async () => {
+  loading.value = true;
+
   try {
     const response = await api.post('login/librarian', { form: form.value });
     $q.sessionStorage.set(
@@ -96,6 +99,7 @@ const handleSubmit = async () => {
       color: 'negative',
       timeout: 3000,
     });
+    loading.value = false;
   }
 };
 </script>
