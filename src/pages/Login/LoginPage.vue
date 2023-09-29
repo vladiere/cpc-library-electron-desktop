@@ -93,13 +93,13 @@ const handleSubmit = async () => {
 
     router.push('/dashboard');
   } catch (error: any) {
+    loading.value = false;
     $q.notify({
       position: 'top',
       message: error.response.data.error,
       color: 'negative',
       timeout: 3000,
     });
-    loading.value = false;
   }
 };
 </script>

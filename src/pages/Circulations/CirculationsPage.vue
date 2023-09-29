@@ -12,8 +12,8 @@
       <q-tab-panels
         v-model="tab"
         animated
-        transition-prev="scale"
-        transition-next="scale"
+        transition-prev="slide-right"
+        transition-next="slide-right"
         class="bg-grey-2 text-dark text-center"
       >
         <q-tab-panel name="reservations">

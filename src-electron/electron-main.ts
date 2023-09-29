@@ -23,6 +23,14 @@ function createWindow() {
     },
   });
 
+  // Set the Content-Security-Policy header
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const responseHeaders = Object.assign({}, details.responseHeaders, {
+      'Content-Security-Policy': "script-src 'self' http://localhost:8000;",
+    });
+    callback({ cancel: false, responseHeaders });
+  });
+
   mainWindow.loadURL(process.env.APP_URL);
 
   if (process.env.DEBUGGING) {

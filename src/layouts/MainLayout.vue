@@ -81,10 +81,10 @@
       <router-view />
     </q-page-container>
 
-    <q-footer bordered class="bg-grey-8 text-white">
+    <q-footer bordered class="bg-grey-7 text-white">
       <q-toolbar>
         <q-toolbar-title>
-          <div>CPC Library</div>
+          <FooterComponent />
         </q-toolbar-title>
       </q-toolbar>
     </q-footer>
@@ -104,6 +104,7 @@ import { useQuasar } from 'quasar';
 import ListNotifications, {
   NotificationsProps,
 } from 'src/components/Notify/ListNotifications.vue';
+import FooterComponent from 'src/components/Footer/FooterComponent.vue';
 
 const route = useRoute();
 const routeName = ref<unknown>('');

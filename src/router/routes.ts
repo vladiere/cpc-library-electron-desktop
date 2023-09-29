@@ -38,6 +38,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', name: 'Resources', component: () => import('pages/Resources/ResourcesPage.vue') },
+      { path: 'bulkupload', name: 'Bulk Upload', component: () => import('pages/Resources/BulkUpload.vue') },
     ]
   },
   {

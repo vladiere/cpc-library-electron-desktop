@@ -13,7 +13,7 @@
         label="Bulk Upload"
         square
         icon="upload"
-        :to="{ name: 'BulkUploads' }"
+        :to="{ name: 'Bulk Upload' }"
       >
         <q-tooltip class="bg-grey-7 text-grey-1" :delay="200"
           >Bulk Upload with your excel file</q-tooltip
