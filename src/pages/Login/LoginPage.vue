@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
-import { api } from 'src/boot/axios';
+import { loginApi } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 
@@ -85,15 +85,17 @@ const handleSubmit = async () => {
   loading.value = true;
 
   try {
-    const response = await api.post('login/librarian', { form: form.value });
-    $q.sessionStorage.set(
-      'token',
-      response.data.user.librarian_id + ' ' + response.data.user.token
-    );
+    const response = await loginApi.post('login/librarian', {
+      form: form.value,
+    });
+
+    $q.sessionStorage.set('token', response.data.user.accessToken);
+    $q.sessionStorage.set('refresh', response.data.user.refreshToken);
 
     router.push('/dashboard');
   } catch (error: any) {
     loading.value = false;
+    console.log(error.response.data);
     $q.notify({
       position: 'top',
       message: error.response.data.error,

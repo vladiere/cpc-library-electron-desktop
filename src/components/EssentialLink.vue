@@ -1,5 +1,11 @@
 <template>
-  <q-item clickable v-ripple :to="handleClick(link)" active-class="text-grey-1">
+  <q-item
+    clickable
+    v-ripple
+    :to="link"
+    @click="handleClick(link)"
+    active-class="text-grey-1"
+  >
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" size="34px" />
     </q-item-section>
@@ -11,6 +17,9 @@
 
 <script setup lang="ts">
 import { useLibrarianDataStore } from 'stores/user';
+import { SessionStorage } from 'quasar';
+import { api } from 'src/boot/axios';
+import { useRouter } from 'vue-router';
 
 export interface EssentialLinkProps {
   title: string;
@@ -27,13 +36,29 @@ withDefaults(defineProps<EssentialLinkProps>(), {
 });
 
 const librarianStore = useLibrarianDataStore();
+const router = useRouter();
 
-const handleClick = (link: string) => {
+const handleClick = async (link: string) => {
+  console.log(link);
+
   if (link === 'logout') {
-    librarianStore.clearLibrarian();
-    return '/';
-  } else {
-    return link;
+    const response = await api.post(
+      '/logout/librarian',
+      { refreshToken: SessionStorage.getItem('refresh') as string },
+      {
+        headers: {
+          Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
+        },
+      }
+    );
+
+    if (response.data !== '') {
+      librarianStore.clearLibrarian();
+      SessionStorage.clear();
+      router.push('/');
+    } else {
+      console.log(response.data);
+    }
   }
 };
 </script>

@@ -15,7 +15,7 @@
         max-file-size="200000"
         max-total-size="200000"
         style="max-width: 300px"
-        :headers="[{ name: 'Authorization', value: `Bearer ${token}` }]"
+        :headers="[{ name: 'Authorization', value: `Bearer ${($q.sessionStorage.getItem('token') as string)}` }]"
         @rejected="onFileRejected"
         @uploaded="onFileUpload"
       />
@@ -34,8 +34,6 @@ defineComponent({
 });
 
 const $q = useQuasar();
-const temp = new String($q.sessionStorage.getItem('token'));
-const token = temp.split(' ')[1];
 const dataToSend = ref([]);
 
 const mapErrors: Record<string, string> = {

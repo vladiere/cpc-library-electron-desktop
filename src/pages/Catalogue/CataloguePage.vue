@@ -23,12 +23,36 @@
         <div class="column">
           <div class="row q-gutter-x-md">
             <div class="col">
-              <q-input v-model="text" outlined label="Subject" />
+              <q-select
+                filled
+                v-model="text"
+                use-input
+                hide-selected
+                fill-input
+                input-debounce="0"
+                label="Accession No"
+                :options="options"
+                @filter="filterFn"
+                @filter-abort="abortFilterFn"
+                style="width: 250px"
+                hint="With hide-selected and fill-input"
+              >
+                <template v-slot:no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      No results
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
             </div>
             <div class="col">
-              <q-input v-model="text" outlined label="DDC" />
+              <q-input v-model="text" dense outlined label="Book subject" />
             </div>
-            <q-btn label="Add" color="primary" />
+            <div class="col">
+              <q-input v-model="text" dense outlined label="DDC" />
+            </div>
+            <q-btn label="Add Subject" no-caps rounded color="primary" />
           </div>
         </div>
         <div class="col row q-gutter-x-lg q-ml-sm text-h6 text-bold">
@@ -47,16 +71,6 @@
       </q-tab-panel>
 
       <q-tab-panel name="classification" class="q-gutter-md">
-        <div class="text-h6">Classification Number</div>
-        <div class="row q-gutter-x-md">
-          <div class="col">
-            <q-input v-model="text" outlined label="Subject" />
-          </div>
-          <div class="col">
-            <q-input v-model="text" outlined label="DDC" />
-          </div>
-          <q-btn label="Add" color="primary" />
-        </div>
         <div class="text-h6">Dewey Decimal Classification</div>
         <q-virtual-scroll
           style="max-height: 300px"
@@ -94,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import BookSubject, {
   BookSubjectProps,
 } from 'src/components/Catalogue/BookSubject.vue';
@@ -104,6 +118,9 @@ import ClassificationNo, {
 import FormatsComponent, {
   FormatsProps,
 } from 'src/components/Catalogue/FormatsComponent.vue';
+import IBookModel from 'src/models/bookModel';
+import { api } from 'src/boot/axios';
+import { SessionStorage } from 'quasar';
 
 defineComponent({
   name: 'CataloguePage',
@@ -111,6 +128,8 @@ defineComponent({
 
 const tab = ref('booksubj');
 const text = ref('');
+const options = ref<IBookModel[]>([]);
+let dataOptions: IBookModel[] = [];
 
 // Sample data
 const bookSubject: BookSubjectProps[] = [
@@ -186,11 +205,6 @@ const categories: ClassificationProps[] = [
     ddc: '92-920',
     name: 'Biography And Collective Biography',
   },
-  {
-    id: 12,
-    ddc: '--',
-    name: 'eBooks',
-  },
 ];
 
 const ebookFormats: FormatsProps[] = [
@@ -235,4 +249,44 @@ const ebookFormats: FormatsProps[] = [
     format: 'PDB',
   },
 ];
+
+const getBooksList = async () => {
+  try {
+    const response = await api.get('/get/all/books', {
+      headers: {
+        Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
+      },
+    });
+
+    dataOptions = response.data;
+    response.data.map((item: any) => console.log(item));
+    console.log(dataOptions);
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+const filterFn = (val: any, update: any, abort: any) => {
+  // call abort() at any time if you can't retrieve data somehow
+  setTimeout(() => {
+    update(() => {
+      if (val === '') {
+        options.value = dataOptions;
+      } else {
+        const needle = val.toLowerCase();
+        options.value = dataOptions.filter(
+          (v: any) => v.toLowerCase().indexOf(needle) > -1
+        );
+      }
+    });
+  }, 1500);
+};
+
+const abortFilterFn = () => {
+  // console.log('delayed filter aborted')
+  console.log('aborted');
+};
+onMounted(() => {
+  getBooksList();
+});
 </script>

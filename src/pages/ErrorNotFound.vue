@@ -8,7 +8,7 @@
       flat
       icon="mdi-step-backward"
       unelevated
-      to="/"
+      to="/dashboard"
       label="Go Home"
       no-caps
     />

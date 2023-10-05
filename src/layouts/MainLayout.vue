@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lff">
+  <q-layout view="lHh Lpr lff" :loading="loading">
     <q-header class="bg-grey-2 text-grey-6 q-py-sm" bordered>
       <q-toolbar>
         <q-btn
@@ -96,7 +96,7 @@ import { onMounted, ref, watchEffect } from 'vue';
 import EssentialLink, {
   EssentialLinkProps,
 } from 'components/EssentialLink.vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import appLogo from 'src/assets/applogo.png';
 import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
@@ -105,11 +105,15 @@ import ListNotifications, {
   NotificationsProps,
 } from 'src/components/Notify/ListNotifications.vue';
 import FooterComponent from 'src/components/Footer/FooterComponent.vue';
+import jwt_decode from 'jwt-decode';
+import IDecodedModel from 'src/models/decodedModel';
 
 const route = useRoute();
+const router = useRouter();
 const routeName = ref<unknown>('');
 const librarianStore = useLibrarianDataStore();
 const $q = useQuasar();
+const loading = ref(true);
 
 const essentialLinks: EssentialLinkProps[] = [
   {
@@ -168,18 +172,25 @@ function toggleLeftDrawer() {
 
 const getLibrarianDetails = async () => {
   try {
-    const temp = new String($q.sessionStorage.getItem('token'));
-    const token = temp?.split(' ')[1];
-    const id = temp?.split(' ')[0];
+    const decodedToken: IDecodedModel = jwt_decode(
+      $q.sessionStorage.getItem('token') as string
+    );
 
-    const response = await api.get(`get/librarian/${parseInt(id)}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.post(
+      '/get/librarian',
+      { librarian_id: decodedToken.user_id, option: 'single' },
+      {
+        headers: {
+          Authorization: `Bearer ${
+            $q.sessionStorage.getItem('token') as string
+          }`,
+        },
+      }
+    );
 
     librarianStore.initLibrarian(response.data[0]);
   } catch (error: any) {
+    router.push('/');
     throw new Error(error);
   }
 };
@@ -244,11 +255,13 @@ notifications.sort((a, b) => {
 
   if (statusA < statusB) return 1;
   if (statusA > statusB) return -1;
+
   return 0;
 });
 
 onMounted(() => {
   getLibrarianDetails();
+
   routeName.value = route.name;
 });
 

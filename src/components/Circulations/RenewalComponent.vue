@@ -21,12 +21,6 @@
         <q-item-label caption lines="1">
           @rstoenescu in #3: > Generic type parameter for props
         </q-item-label>
-        <q-item-label
-          lines="1"
-          class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase"
-        >
-          <span class="cursor-pointer">Open in GitHub</span>
-        </q-item-label>
       </q-item-section>
 
       <q-item-section top side>
@@ -68,12 +62,6 @@
         </q-item-label>
         <q-item-label caption lines="1">
           @rstoenescu in #3: > Generic type parameter for props
-        </q-item-label>
-        <q-item-label
-          lines="1"
-          class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase"
-        >
-          <span class="cursor-pointer">Open in GitHub</span>
         </q-item-label>
       </q-item-section>
 

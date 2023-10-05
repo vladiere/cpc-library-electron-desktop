@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mb-lg">
+  <q-page padding class="q-mb-lg" :loading="loading">
     <div class="column">
       <div class="row" style="gap: 25px">
         <div
@@ -42,16 +42,20 @@
             </q-card-section>
 
             <q-card-section class="q-pt-none flex flex-center">
-              <div class="text-subtitle1 text-grey-8 text-center">
+              <div
+                class="text-subtitle1 text-grey-8 text-center text-capitalize"
+              >
                 {{ form.description || 'To be editted' }}
               </div>
             </q-card-section>
           </q-card>
         </div>
 
-        <div
+        <q-form
           class="col column bg-white q-pa-md shadow-2"
           style="border-radius: 5px; gap: 15px"
+          greedy
+          @submit.prevent="handleSubmitUpdate"
         >
           <span class="text-h4">Edit Profile</span>
           <div class="row" style="gap: 15px">
@@ -66,7 +70,12 @@
             </div>
             <div class="col column">
               <span class="text-grey-7">Username</span>
-              <q-input filled v-model="form.username" label="Username" />
+              <q-input
+                filled
+                disable
+                v-model="form.username"
+                label="Username"
+              />
             </div>
             <div class="col column">
               <span class="text-grey-7">Email Address</span>
@@ -80,15 +89,30 @@
           <div class="row" style="gap: 15px">
             <div class="col column">
               <span class="text-grey-7">Firstname</span>
-              <q-input filled v-model="form.firstname" label="Firstname" />
+              <q-input
+                filled
+                disable
+                v-model="form.firstname"
+                label="Firstname"
+              />
             </div>
             <div class="col column">
               <span class="text-grey-7">Middlename</span>
-              <q-input filled v-model="form.middlename" label="Middlename" />
+              <q-input
+                filled
+                disable
+                v-model="form.middlename"
+                label="Middlename"
+              />
             </div>
             <div class="col column">
               <span class="text-grey-7">Lastname</span>
-              <q-input filled v-model="form.lastname" label="Lastname" />
+              <q-input
+                filled
+                disable
+                v-model="form.lastname"
+                label="Lastname"
+              />
             </div>
           </div>
 
@@ -145,6 +169,7 @@
                 filled
                 v-model="form.phone_number"
                 label="Phone/Cellphone Number"
+                @input="formatPhoneNumber"
               />
             </div>
           </div>
@@ -167,38 +192,65 @@
             />
           </div>
           <div class="row self-center">
-            <q-btn rounded label="update profile" color="primary" />
+            <q-btn rounded label="update profile" type="submit" color="primary">
+              <q-tooltip class="bg-grey-10 text-grey-2"
+                >Update your profile</q-tooltip
+              >
+            </q-btn>
           </div>
-        </div>
+        </q-form>
       </div>
-      <div class="column q-mt-lg bg-white shadow-2" style="border-radius: 5px">
-        <span class="self-center text-h4 q-my-md">Library Staff</span>
-        <q-list bordered separator>
-          <q-item-label header>Staff</q-item-label>
-
-          <StaffComponent
-            v-for="contact in contacts"
-            :key="contact.email"
-            v-bind="contact"
-          />
-        </q-list>
+      <div
+        class="column q-mt-lg bg-white shadow-2 q-gutter-y-md"
+        style="border-radius: 5px"
+      >
+        <div class="col column q-mx-md">
+          <span class="self-center text-h4 q-my-md">Library Staff</span>
+          <q-btn
+            color="primary"
+            label="Register Staff"
+            rounded
+            class="self-start"
+            no-caps
+            to="/register"
+          >
+            <q-tooltip class="bg-grey-10 text-grey-2"
+              >Register new staff</q-tooltip
+            >
+          </q-btn>
+        </div>
+        <q-separator />
+        <q-virtual-scroll
+          :items="contacts"
+          separator
+          style="max-height: 400px"
+          v-slot="{ item, index }"
+        >
+          <StaffComponent :key="index" v-bind="item" />
+        </q-virtual-scroll>
       </div>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import StaffComponent, {
   StaffProps,
 } from 'src/components/UserProfile/StaffComponent.vue';
 import { useLibrarianDataStore } from 'src/stores/user';
+import { api } from 'src/boot/axios';
+import jwt_decode from 'jwt-decode';
+import { useQuasar } from 'quasar';
+import IDecodedModel from 'src/models/decodedModel';
 
 defineComponent({
   name: 'UserProfile',
 });
 
 const librarianStore = useLibrarianDataStore();
+const $q = useQuasar();
+const loading = ref(true);
 
 const form = ref({
   librarian_id: librarianStore.librarian_id,
@@ -218,26 +270,86 @@ const form = ref({
   privilege: librarianStore.privilege,
 });
 
-const contacts: StaffProps[] = [
-  {
-    name: 'Ruddy Jedrzej',
-    email: 'rjedrzej0@discuz.net',
-    letter: 'R',
-  },
-  {
-    name: 'Mallorie Alessandrini',
-    email: 'malessandrini1@marketwatch.com',
-    letter: 'M',
-  },
-  {
-    name: 'Elisabetta Wicklen',
-    email: 'ewicklen2@microsoft.com',
-    letter: 'E',
-  },
-  {
-    name: 'Seka Fawdrey',
-    email: 'sfawdrey3@wired.com',
-    letter: 'S',
-  },
-];
+const formatPhoneNumber = () => {
+  // Remove all non-numeric characters from the input
+  let formattedNumber = form.value.phone_number.replace(/\D/g, '');
+
+  // Check if the number starts with "09" or "+639"
+  if (formattedNumber.startsWith('09')) {
+    // Format as "09XX-XXX-XXXX"
+    formattedNumber = formattedNumber.replace(
+      /(\d{2})(\d{3})(\d{4})/,
+      '09$1-$2-$3'
+    );
+  } else if (formattedNumber.startsWith('+639')) {
+    // Format as "+639XX-XXX-XXXX"
+    formattedNumber = formattedNumber.replace(
+      /(\d{3})(\d{3})(\d{4})/,
+      '+639$1-$2-$3'
+    );
+  }
+
+  // Update the phoneNumber ref with the formatted number
+  form.value.phone_number = formattedNumber;
+};
+
+const contacts = ref<StaffProps[]>([]);
+
+const handleSubmitUpdate = async () => {
+  console.log(form.value);
+  try {
+    const response = await api.post(
+      '/update/librarian/info',
+      { librarian_info: form.value },
+      {
+        headers: {
+          Authorization: `Bearer ${
+            ($q.sessionStorage.getItem('token') as string).split(' ')[1]
+          }`,
+        },
+      }
+    );
+
+    librarianStore.initLibrarian(response.data);
+    $q.notify({
+      message: response.data.message,
+      type: 'positive',
+      position: 'top',
+      timeout: 2500,
+    });
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+const getLibrarianStaffs = async () => {
+  try {
+    const decodedToken: IDecodedModel = jwt_decode(
+      $q.sessionStorage.getItem('token') as string
+    );
+    const response = await api.post(
+      '/get/librarian',
+      { librarian_id: decodedToken.user_id, option: '' },
+      {
+        headers: {
+          Authorization: `Bearer ${
+            $q.sessionStorage.getItem('token') as string
+          }`,
+        },
+      }
+    );
+
+    contacts.value = response.data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+onMounted(() => {
+  getLibrarianStaffs();
+
+  setTimeout(() => {
+    loading.value = false;
+  }, 2000);
+});
 </script>

@@ -9,14 +9,14 @@ defineComponent({
   name: 'UsersTable',
 });
 
-const columns = [
+const columns: any = [
   {
     name: 'name',
     required: true,
     label: 'Dessert (100g serving)',
     align: 'left',
-    field: (row) => row.name,
-    format: (val) => `${val}`,
+    field: (row: any) => row.name,
+    format: (val: any) => `${val}`,
     sortable: true,
   },
   {
@@ -35,14 +35,14 @@ const columns = [
     label: 'Calcium (%)',
     field: 'calcium',
     sortable: true,
-    sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+    sort: (a: any, b: any) => parseInt(a, 10) - parseInt(b, 10),
   },
   {
     name: 'iron',
     label: 'Iron (%)',
     field: 'iron',
     sortable: true,
-    sort: (a, b) => parseInt(a, 10) - parseInt(b, 10),
+    sort: (a: any, b: any) => parseInt(a, 10) - parseInt(b, 10),
   },
 ];
 

@@ -10,9 +10,11 @@
       rowsPerPage: 10,
       sortBy: 'name',
     }"
+    :filter="filter"
+    class="text-capitalize q-pa-md"
   >
-    <template v-slot:body-cell-button="{ row }">
-      <q-td key="button">
+    <template v-slot:body-cell-button="{ row, col }">
+      <q-td key="button" :props="col.props">
         <q-btn
           icon="delete"
           size="md"
@@ -21,7 +23,7 @@
           dense
           @click="handleButtonClick('delete', row)"
         >
-          <q-tooltip class="bg-red-3 text-grey-10" :delay="200"
+          <q-tooltip class="bg-grey-9 text-grey-1" :delay="200"
             >remove item</q-tooltip
           >
         </q-btn>
@@ -33,16 +35,33 @@
           dense
           @click="handleButtonClick('edit', row)"
         >
-          <q-tooltip class="bg-green-3 text-grey-10" :delay="200"
+          <q-tooltip class="bg-grey-9 text-grey-1" :delay="200"
             >edit item</q-tooltip
           >
         </q-btn>
       </q-td>
     </template>
+    <template v-slot:top>
+      <span class="text-h5 text-bold">Mange Resources</span>
+      <q-space />
+      <q-input
+        class="text-lowercase"
+        dense
+        debounce="300"
+        color="primary"
+        v-model="filter"
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+    </template>
   </q-table>
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
+import { api } from 'src/boot/axios';
 import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -51,15 +70,24 @@ defineComponent({
 });
 
 const router = useRouter();
+const $q = useQuasar();
 const loading = ref(false);
+const filter = ref('');
 
-const columns = ref([
+const columns: any = ref([
+  {
+    name: 'button',
+    required: true,
+    align: 'center',
+    label: 'Manage',
+    field: 'button',
+  },
   {
     name: 'Accession No.',
     required: true,
     label: 'Accession No.',
     align: 'center',
-    field: 'Accession No',
+    field: 'accession_no',
     sortable: true,
   },
   {
@@ -67,7 +95,7 @@ const columns = ref([
     required: true,
     label: 'Date Received',
     align: 'left',
-    field: 'Date Received',
+    field: 'date_received',
     sortable: true,
   },
   {
@@ -75,7 +103,7 @@ const columns = ref([
     required: true,
     label: 'Author',
     align: 'left',
-    field: 'Author',
+    field: 'author',
     sortable: true,
   },
   {
@@ -83,7 +111,7 @@ const columns = ref([
     required: true,
     label: 'Title of the Book',
     align: 'left',
-    field: 'Title of the Book',
+    field: 'title',
     sortable: true,
   },
   {
@@ -91,7 +119,7 @@ const columns = ref([
     required: true,
     label: 'Edition',
     align: 'center',
-    field: 'Edition',
+    field: 'edition',
     sortable: true,
   },
   {
@@ -99,7 +127,7 @@ const columns = ref([
     required: true,
     label: 'Volumes',
     align: 'center',
-    field: 'Volumes',
+    field: 'volumes',
     sortable: true,
   },
   {
@@ -107,7 +135,7 @@ const columns = ref([
     required: true,
     label: 'Cost Price',
     align: 'center',
-    field: 'Cost Price',
+    field: 'cost_price',
     sortable: true,
   },
   {
@@ -115,7 +143,7 @@ const columns = ref([
     required: true,
     label: 'Publisher',
     align: 'left',
-    field: 'Publisher',
+    field: 'publisher_name',
     sortable: true,
   },
   {
@@ -123,7 +151,7 @@ const columns = ref([
     required: true,
     label: 'Copyright Yr.',
     align: 'center',
-    field: 'Copyright Yr',
+    field: 'copyright_yr',
     sortable: true,
   },
   {
@@ -131,132 +159,43 @@ const columns = ref([
     required: true,
     label: 'Remarks',
     align: 'left',
-    field: 'Remarks',
+    field: 'remarks',
     sortable: true,
   },
 ]);
 
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6.0,
-    carbs: 24,
-    protein: 4.0,
-    sodium: 87,
-    calcium: '14%',
-    iron: '1%',
-  },
-  {
-    name: 'Ice cream sandwich',
-    calories: 237,
-    fat: 9.0,
-    carbs: 37,
-    protein: 4.3,
-    sodium: 129,
-    calcium: '8%',
-    iron: '1%',
-  },
-  {
-    name: 'Eclair',
-    calories: 262,
-    fat: 16.0,
-    carbs: 23,
-    protein: 6.0,
-    sodium: 337,
-    calcium: '6%',
-    iron: '7%',
-  },
-  {
-    name: 'Cupcake',
-    calories: 305,
-    fat: 3.7,
-    carbs: 67,
-    protein: 4.3,
-    sodium: 413,
-    calcium: '3%',
-    iron: '8%',
-  },
-  {
-    name: 'Gingerbread',
-    calories: 356,
-    fat: 16.0,
-    carbs: 49,
-    protein: 3.9,
-    sodium: 327,
-    calcium: '7%',
-    iron: '16%',
-  },
-  {
-    name: 'Jelly bean',
-    calories: 375,
-    fat: 0.0,
-    carbs: 94,
-    protein: 0.0,
-    sodium: 50,
-    calcium: '0%',
-    iron: '0%',
-  },
-  {
-    name: 'Lollipop',
-    calories: 392,
-    fat: 0.2,
-    carbs: 98,
-    protein: 0,
-    sodium: 38,
-    calcium: '0%',
-    iron: '2%',
-  },
-  {
-    name: 'Honeycomb',
-    calories: 408,
-    fat: 3.2,
-    carbs: 87,
-    protein: 6.5,
-    sodium: 562,
-    calcium: '0%',
-    iron: '45%',
-  },
-  {
-    name: 'Donut',
-    calories: 452,
-    fat: 25.0,
-    carbs: 51,
-    protein: 4.9,
-    sodium: 326,
-    calcium: '2%',
-    iron: '22%',
-  },
-  {
-    name: 'KitKat',
-    calories: 518,
-    fat: 26.0,
-    carbs: 65,
-    protein: 7,
-    sodium: 54,
-    calcium: '12%',
-    iron: '6%',
-  },
-];
+const rows = ref([]);
 
 const handleButtonClick = (act: string, row: object) => {
-  console.log(act, row);
   if (act === 'edit') {
     router.push({
-      name: 'ResourcesEdit',
+      name: 'Edit Record',
       query: { dataJSON: JSON.stringify(row) },
     });
   }
 };
 
-const fetchData = () => {
+const fetchData = async () => {
   loading.value = true;
-  setTimeout(() => {
-    loading.value = false;
-  }, 2000);
+  try {
+    const response = await api.get('/get/all/books', {
+      headers: {
+        Authorization: `Bearer ${$q.sessionStorage.getItem('token') as string}`,
+      },
+    });
+
+    setTimeout(() => {
+      loading.value = false;
+    }, 2000);
+
+    rows.value = response.data;
+  } catch (error: any) {
+    console.error(error.message);
+    throw new Error(error);
+  }
 };
 
 onMounted(() => {
-  fetchData;
+  fetchData();
 });
 </script>
