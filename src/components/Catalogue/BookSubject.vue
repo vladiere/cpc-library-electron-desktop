@@ -1,35 +1,78 @@
 <template>
-  <q-item :key="id" dense>
-    <q-item-section>
-      <q-item-label>
-        <div class="row justify txt-left">
-          <div class="col-1">
-            <span>{{ subject }}</span>
-          </div>
-          <div class="col-1">
-            <span>{{ ddc }}</span>
-          </div>
-          <div class="col-1">
-            <span>{{ created }}</span>
-          </div>
-        </div>
-      </q-item-label>
-    </q-item-section>
-  </q-item>
+  <q-table
+    title="Book Catalog"
+    class="text-capitalize"
+    style="max-height: 350px"
+    :rows="$props.rowsObject"
+    :columns="columns"
+    row-key="name"
+    :filter="filter"
+    flat
+  >
+    <template v-slot:top>
+      <span class="text-h6">Book Catalog</span>
+      <q-space />
+      <q-input v-model="filter" borderless label="Search Catalog">
+        <template v-slot:after>
+          <q-icon name="mdi-magnify" />
+        </template>
+      </q-input>
+    </template>
+  </q-table>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+
+const columns: any = [
+  {
+    name: 'accession_no',
+    label: 'Accession No.',
+    align: 'center',
+    required: true,
+    field: 'accession_no',
+    sortable: true,
+  },
+  {
+    name: 'book_subject',
+    label: 'Book Subject',
+    align: 'left',
+    required: true,
+    field: 'book_subject',
+    sortable: true,
+  },
+  {
+    name: 'title',
+    label: 'Title of the book',
+    align: 'center',
+    required: true,
+    field: 'title',
+    sortable: true,
+  },
+  {
+    name: 'ddc_code',
+    label: 'DDC Code',
+    align: 'center',
+    required: true,
+    field: 'ddc_code',
+    sortable: true,
+  },
+  {
+    name: 'created',
+    label: 'Created',
+    align: 'center',
+    required: true,
+    field: 'created',
+    sortable: true,
+  },
+];
+const filter = ref('');
+
 export interface BookSubjectProps {
-  id: number;
-  subject: string;
-  ddc: string;
-  created: string;
+  rowsObject: object | any;
 }
 
 withDefaults(defineProps<BookSubjectProps>(), {
-  id: 0,
-  subject: '',
-  ddc: '',
-  create: '',
+  rowsObject: Object || [],
 });
 </script>

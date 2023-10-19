@@ -3,14 +3,14 @@
     <div class="flex flex-center fullscreen">
       <q-img
         fit="fill"
-        src="src/assets/backgrounds/bg.jpg"
+        src="../../assets/backgrounds/bg.jpg"
         alt="library_background"
         :ratio="16 / 5"
       />
       <q-img
         fit="cover"
         :ratio="16 / 5"
-        src="src/assets/backgrounds/bg2.jpg"
+        src="../../assets/backgrounds/bg2.jpg"
         alt="library_background"
       />
     </div>
@@ -22,7 +22,7 @@
       style="z-index: 9999; border-radius: 15px; gap: 15px; width: 30%"
     >
       <q-img
-        src="src/assets/librarylogo.png"
+        src="../../assets/librarylogo.png"
         style="border-radius: 50%"
         width="40%"
         class="self-center"
@@ -87,6 +87,10 @@ const handleSubmit = async () => {
   try {
     const response = await loginApi.post('login/librarian', {
       form: form.value,
+    },{
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
 
     $q.sessionStorage.set('token', response.data.user.accessToken);
@@ -96,6 +100,7 @@ const handleSubmit = async () => {
   } catch (error: any) {
     loading.value = false;
     console.log(error.response.data);
+    console.log(error);
     $q.notify({
       position: 'top',
       message: error.response.data.error,

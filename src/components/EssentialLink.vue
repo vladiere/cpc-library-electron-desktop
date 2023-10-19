@@ -39,8 +39,6 @@ const librarianStore = useLibrarianDataStore();
 const router = useRouter();
 
 const handleClick = async (link: string) => {
-  console.log(link);
-
   if (link === 'logout') {
     const response = await api.post(
       '/logout/librarian',

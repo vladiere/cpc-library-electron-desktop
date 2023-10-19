@@ -20,26 +20,23 @@
     >
       <q-tab-panel name="booksubj" class="q-gutter-md">
         <div class="text-h6">Book Subject</div>
+
         <div class="column">
           <div class="row q-gutter-x-md">
             <div class="col">
               <q-select
-                filled
-                v-model="text"
+                outlined
                 use-input
-                hide-selected
-                fill-input
-                input-debounce="0"
-                label="Accession No"
+                :input-debounce="0"
+                dense
+                v-model="form.accession_no"
+                label="Accession No."
                 :options="options"
                 @filter="filterFn"
-                @filter-abort="abortFilterFn"
-                style="width: 250px"
-                hint="With hide-selected and fill-input"
               >
                 <template v-slot:no-option>
                   <q-item>
-                    <q-item-section class="text-grey">
+                    <q-item-section class="text-grey-8">
                       No results
                     </q-item-section>
                   </q-item>
@@ -47,27 +44,26 @@
               </q-select>
             </div>
             <div class="col">
-              <q-input v-model="text" dense outlined label="Book subject" />
+              <q-input
+                v-model="form.book_subject"
+                dense
+                outlined
+                label="Book subject"
+              />
             </div>
             <div class="col">
-              <q-input v-model="text" dense outlined label="DDC" />
+              <q-input v-model="form.ddc_code" dense outlined label="DDC" />
             </div>
-            <q-btn label="Add Subject" no-caps rounded color="primary" />
+            <q-btn
+              label="Add Subject"
+              no-caps
+              rounded
+              color="primary"
+              @click="handleAddSubject"
+            />
           </div>
         </div>
-        <div class="col row q-gutter-x-lg q-ml-sm text-h6 text-bold">
-          <span>Subject</span>
-          <span>DDC</span>
-          <span>Created</span>
-        </div>
-        <q-virtual-scroll
-          style="max-height: 300px"
-          :items="bookSubject"
-          separator
-          v-slot="{ item, index }"
-        >
-          <BookSubject :key="index" v-bind="item" />
-        </q-virtual-scroll>
+        <BookSubject :rows-object="rowsObject" />
       </q-tab-panel>
 
       <q-tab-panel name="classification" class="q-gutter-md">
@@ -109,61 +105,45 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
-import BookSubject, {
-  BookSubjectProps,
-} from 'src/components/Catalogue/BookSubject.vue';
+import BookSubject from 'src/components/Catalogue/BookSubject.vue';
 import ClassificationNo, {
   ClassificationProps,
 } from 'src/components/Catalogue/ClassificationNo.vue';
 import FormatsComponent, {
   FormatsProps,
 } from 'src/components/Catalogue/FormatsComponent.vue';
-import IBookModel from 'src/models/bookModel';
 import { api } from 'src/boot/axios';
-import { SessionStorage } from 'quasar';
+import { SessionStorage, Notify } from 'quasar';
+import formatDateToHumanReadable from 'src/functions/formattedDated';
 
 defineComponent({
   name: 'CataloguePage',
 });
 
+interface RowData {
+  created: string;
+  accession_no: null;
+  book_suject: string;
+  ddc_code: string;
+}
+
 const tab = ref('booksubj');
 const text = ref('');
-const options = ref<IBookModel[]>([]);
-let dataOptions: IBookModel[] = [];
-
-// Sample data
-const bookSubject: BookSubjectProps[] = [
-  {
-    id: 1,
-    subject: 'History',
-    ddc: '900',
-    created: '2023-09-10',
-  },
-  {
-    id: 2,
-    subject: 'Science',
-    ddc: '500',
-    created: '2023-09-09',
-  },
-  {
-    id: 3,
-    subject: 'Literature',
-    ddc: '800',
-    created: '2023-09-08',
-  },
-  {
-    id: 4,
-    subject: 'Mathematics',
-    ddc: '510',
-    created: '2023-09-07',
-  },
-  {
-    id: 5,
-    subject: 'Art',
-    ddc: '700',
-    created: '2023-09-06',
-  },
-];
+const options = ref([]);
+let dataOptions: any = [];
+const dataArray: any = [];
+const rowsObject = ref<any[]>([]);
+const responseData = ref<any[]>([]);
+const newForm = ref({
+  accession_id: null,
+  book_subject: '',
+  ddc_code: '',
+});
+const form = ref({
+  accession_no: null,
+  book_subject: '',
+  ddc_code: '',
+});
 
 const categories: ClassificationProps[] = [
   {
@@ -257,10 +237,15 @@ const getBooksList = async () => {
         Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
       },
     });
+    responseData.value = response.data;
 
-    dataOptions = response.data;
-    response.data.map((item: any) => console.log(item));
-    console.log(dataOptions);
+    response.data.map((item: any) => {
+      dataOptions.push(item.accession_no);
+      dataArray.push({
+        accession_id: item.accession_id,
+        accession_no: item.accession_no,
+      });
+    });
   } catch (error: any) {
     throw new Error(error);
   }
@@ -269,24 +254,92 @@ const getBooksList = async () => {
 const filterFn = (val: any, update: any, abort: any) => {
   // call abort() at any time if you can't retrieve data somehow
   setTimeout(() => {
-    update(() => {
-      if (val === '') {
+    if (val === '') {
+      update(() => {
         options.value = dataOptions;
-      } else {
-        const needle = val.toLowerCase();
-        options.value = dataOptions.filter(
-          (v: any) => v.toLowerCase().indexOf(needle) > -1
-        );
-      }
+      });
+      return;
+    }
+
+    update(() => {
+      options.value = dataOptions.filter((item: any) =>
+        item.toString().startsWith(val)
+      );
     });
   }, 1500);
 };
 
-const abortFilterFn = () => {
-  // console.log('delayed filter aborted')
-  console.log('aborted');
+const handleAddSubject = async () => {
+  try {
+    dataArray.map((item: any) => {
+      if (item.accession_no === form.value.accession_no) {
+        newForm.value = { ...form.value, accession_id: item.accession_id };
+      }
+    });
+
+    const response = await api.post(
+      '/add/book/catalog',
+      { book_catalog: newForm.value },
+      {
+        headers: {
+          Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+        },
+      }
+    );
+
+    console.log(response.data);
+    if (response.data.status_code === 201) {
+      responseData.value.map((item: any) => {
+        if (form.value.accession_no === item.accession_no) {
+          rowsObject.value.push({
+            ...form.value,
+            title: item.title,
+            created: formatDateToHumanReadable(new Date().toDateString()),
+          });
+        }
+      });
+
+      Notify.create({
+        message: response.data.message,
+        type: 'positive',
+        position: 'top-right',
+        timeout: 2500,
+      });
+
+      Object.entries(form.value).map((item: any) => (item.value = ''));
+    } else {
+      Notify.create({
+        message: response.data.message,
+        type: 'negative',
+        position: 'top-right',
+        timeout: 2500,
+      });
+    }
+  } catch (error: any) {
+    throw new Error(error);
+  }
 };
+
+const getAllCatalog = async () => {
+  try {
+    const response = await api.get('/get/all/book/catalog', {
+      headers: {
+        Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+      },
+    });
+    const mutatedData = response.data.map((item: any) => ({
+      ...item,
+      created: formatDateToHumanReadable(item.created),
+    }));
+
+    rowsObject.value = mutatedData;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
 onMounted(() => {
   getBooksList();
+  getAllCatalog();
 });
 </script>

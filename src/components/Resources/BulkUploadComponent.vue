@@ -48,9 +48,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import { Notify, SessionStorage } from 'quasar';
 
-const $q = useQuasar();
 export interface BulkUploadProps {
   data: object;
 }
@@ -61,10 +60,8 @@ const dataToSend = ref<any[]>([]);
 const onSuccess = ref(false);
 const loading = ref(false);
 const rows = ref<string[][]>([]);
-const temp = new String($q.sessionStorage.getItem('token'));
-const token = temp.split(' ')[1];
 
-const columns = ref([
+const columns: any = ref([
   {
     name: 'Accession No.',
     required: true,
@@ -156,17 +153,19 @@ const handleClick = async () => {
       { jsonRecords: dataToSend.value },
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${SessionStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
       }
     );
 
-    $q.notify({
-      message: response.data[0][0].message,
+    console.log(response.data);
+
+    Notify.create({
+      message: 'Successfully insert records',
       position: 'top',
       type: 'positive',
-      timeout: 3000,
+      timeout: 2500,
     });
 
     onSuccess.value = true;
@@ -186,7 +185,7 @@ onMounted(() => {
     rows.value = dataProps.data.map((item: any) => {
       const row: any = {};
 
-      columns.value.forEach((col, index) => {
+      columns.value.forEach((col: any, index: any) => {
         if (
           item.hasOwnProperty(col.field) &&
           item[col.field] !== null &&
