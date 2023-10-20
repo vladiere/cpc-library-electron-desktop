@@ -65,14 +65,13 @@
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import { loginApi } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import { SessionStorage, Notify } from 'quasar';
 import { useRouter } from 'vue-router';
 
 defineComponent({
   name: 'LoginPage',
 });
 
-const $q = useQuasar();
 const form = ref({
   username: '',
   password: '',
@@ -93,15 +92,15 @@ const handleSubmit = async () => {
       }
     });
 
-    $q.sessionStorage.set('token', response.data.user.accessToken);
-    $q.sessionStorage.set('refresh', response.data.user.refreshToken);
+    SessionStorage.set('token', response.data.user.accessToken);
+    SessionStorage.set('refresh', response.data.user.refreshToken);
 
     router.push('/dashboard');
   } catch (error: any) {
     loading.value = false;
     console.log(error.response.data);
     console.log(error);
-    $q.notify({
+    Notify.create({
       position: 'top',
       message: error.response.data.error,
       color: 'negative',

@@ -241,7 +241,7 @@ import StaffComponent, {
 import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
 import jwt_decode from 'jwt-decode';
-import { useQuasar } from 'quasar';
+import { SessionStorage, Notify } from 'quasar';
 import IDecodedModel from 'src/models/decodedModel';
 
 defineComponent({
@@ -249,7 +249,6 @@ defineComponent({
 });
 
 const librarianStore = useLibrarianDataStore();
-const $q = useQuasar();
 const loading = ref(true);
 
 const form = ref({
@@ -296,7 +295,6 @@ const formatPhoneNumber = () => {
 const contacts = ref<StaffProps[]>([]);
 
 const handleSubmitUpdate = async () => {
-  console.log(form.value);
   try {
     const response = await api.post(
       '/update/librarian/info',
@@ -304,14 +302,14 @@ const handleSubmitUpdate = async () => {
       {
         headers: {
           Authorization: `Bearer ${
-            ($q.sessionStorage.getItem('token') as string).split(' ')[1]
+            SessionStorage.getItem('token')
           }`,
         },
       }
     );
 
     librarianStore.initLibrarian(response.data);
-    $q.notify({
+    Notify.create({
       message: response.data.message,
       type: 'positive',
       position: 'top',
@@ -325,7 +323,7 @@ const handleSubmitUpdate = async () => {
 const getLibrarianStaffs = async () => {
   try {
     const decodedToken: IDecodedModel = jwt_decode(
-      $q.sessionStorage.getItem('token') as string
+      SessionStorage.getItem('token')
     );
     const response = await api.post(
       '/get/librarian',
@@ -333,7 +331,7 @@ const getLibrarianStaffs = async () => {
       {
         headers: {
           Authorization: `Bearer ${
-            $q.sessionStorage.getItem('token') as string
+            SessionStorage.getItem('token')
           }`,
         },
       }

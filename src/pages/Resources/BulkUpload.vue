@@ -15,7 +15,7 @@
         max-file-size="200000"
         max-total-size="200000"
         style="max-width: 300px"
-        :headers="[{ name: 'Authorization', value: `Bearer ${($q.sessionStorage.getItem('token') as string)}` }]"
+        :headers="[{ name: 'Authorization', value: `Bearer ${(SessionStorage.getItem('token') as string)}` }]"
         @rejected="onFileRejected"
         @uploaded="onFileUpload"
       />
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { useQuasar } from 'quasar';
+import { SessionStorage, Notify } from 'quasar';
 import { defineComponent, ref } from 'vue';
 import BulkUploadComponent from 'src/components/Resources/BulkUploadComponent.vue';
 
@@ -48,7 +48,7 @@ interface RejectedEntry {
 
 const onFileRejected = (rejectedEntries: RejectedEntry[]) => {
   rejectedEntries.forEach((entry: RejectedEntry) => {
-    $q.notify({
+    Notify.create({
       message: mapErrors[entry.failedPropValidation],
       position: 'top',
       timeout: 3000,
@@ -66,14 +66,14 @@ const onFileUpload = (data: any) => {
 
     dataToSend.value = jsonResponse.jsonData;
 
-    $q.notify({
+    Notify.create({
       message: jsonResponse.message,
       position: 'top-right',
       type: 'positive',
       timeout: 3000,
     });
   } else {
-    $q.notify({
+    Notify.create({
       message: 'File upload failed something went wrong',
       type: 'negative',
       position: 'top',

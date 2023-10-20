@@ -5,7 +5,7 @@
       <div class="col column relative-position">
         <q-img
           :src="defaultImage"
-          style="max-height: 470px; opacity: 0.7"
+          :style="!hasImage ? 'max-height: 470px' : 'max-height: 470px; opacity: 0.7'"
           fit="fill"
         />
         <q-btn
@@ -19,7 +19,7 @@
             >Change Book Image</q-tooltip
           >
         </q-btn>
-        <div class="absolute-center column q-gutter-y-md">
+        <div v-if="hasImage" class="absolute-center column q-gutter-y-md">
           <span class="col text-grey-10 text-h3 text-bold">No Image</span>
         </div>
       </div>
@@ -142,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { useQuasar } from 'quasar';
+import { SessionStorage, Notify } from 'quasar';
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
@@ -153,12 +153,13 @@ defineComponent({
 
 const route = useRoute();
 const book_record = ref<any>([]);
-const $q = useQuasar();
 const showDialog = ref(false);
 const fileData = ref(null);
 const defaultImage = ref<any>('');
 const imgUrl = 'http://localhost:3000/images/';
 const onSucess = ref(false);
+const hasImage = ref(true);
+
 
 const handleChangeRecord = async () => {
   try {
@@ -168,13 +169,13 @@ const handleChangeRecord = async () => {
       {
         headers: {
           Authorization: `Bearer ${
-            $q.sessionStorage.getItem('token') as string
+            SessionStorage.getItem('token') as string
           }`, // Include the token in the request headers
         },
       }
     );
 
-    $q.notify({
+    Notify.create({
       message: response.data.message,
       position: 'top-right',
       type: 'positive',
@@ -204,13 +205,13 @@ const handleUploadImage = async () => {
         {
           headers: {
             Authorization: `Bearer ${
-              new String($q.sessionStorage.getItem('token')).split(' ')[1]
+              SessionStorage.getItem('token')
             }`,
             'Content-Type': 'multipart/form-data',
           },
         }
       );
-      $q.notify({
+      Notify.create({
         position: 'top-right',
         message: response.data.message,
         type: 'positive',
@@ -221,7 +222,7 @@ const handleUploadImage = async () => {
       showDialog.value = false;
       fileData.value = null;
     } else {
-      $q.notify({
+      Notify.create({
         message: 'Attach image file',
         type: 'negative',
         position: 'top',
@@ -243,6 +244,7 @@ onMounted(() => {
     defaultImage.value =
       'https://picsum.photos/id/444/1200/1200?grayscale&blur=3';
   } else {
+    hasImage.value = false;
     defaultImage.value = imgUrl + book_record.value.img_path;
   }
 

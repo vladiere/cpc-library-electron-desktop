@@ -20,10 +20,10 @@ const api = axios.create({ baseURL: 'http://localhost:3000/api/' });
 const loginApi = axios.create({ baseURL: 'http://localhost:3000/api/' });
 
 // const api = axios.create({
-//   baseURL: 'https://cpc-repo-production.up.railway.app//api/',
+//   baseURL: 'https://cpc-repo-production.up.railway.app/api/',
 // });
 // const loginApi = axios.create({
-//   baseURL: 'https://cpc-repo-production.up.railway.app//api/',
+//   baseURL: 'https://cpc-repo-production.up.railway.app/api/',
 // });
 
 const refreshToken = async () => {
@@ -32,7 +32,6 @@ const refreshToken = async () => {
       refreshToken: SessionStorage.getItem('refresh') as string,
     });
 
-    console.log(response.data[0]);
     return response.data[0];
   } catch (error: any) {
     throw new Error(error);
