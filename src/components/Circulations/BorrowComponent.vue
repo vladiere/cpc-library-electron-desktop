@@ -2,7 +2,11 @@
   <q-table
     bordered
     :rows="rows"
+    class="text-capitalize"
     :columns="columns"
+    selection="multiple"
+    :selected-rows-label="getSelectedString"
+    v-model:selected="selected"
     row-key="name"
     :filter="filter"
     :pagination="{
@@ -13,45 +17,47 @@
     <template v-slot:top>
       <span class="text-h6 text-bold q-pr-md">Borrows</span>
       <q-space />
-      <q-btn
-        color="teal"
-        text-color="grey-2"
-        label="Remind All"
-        @click="handleClick(selected)"
-      />
-      <q-btn-dropdown flat :label="actionLabel" no-caps class="q-ml-md">
-        <q-list class="text-capitalize">
-          <q-item clickable v-close-popup @click="onItemClick('all')">
-            <q-item-section>
-              <q-item-label>all</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-close-popup @click="onItemClick('checkin')">
-            <q-item-section>
-              <q-item-label>checkin records</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-close-popup @click="onItemClick('checkout')">
-            <q-item-section>
-              <q-item-label>checkout records</q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-close-popup @click="onItemClick('borrow')">
-            <q-item-section>
-              <q-item-label>borrow records</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-btn-dropdown>
+      <div class="row q-gutter-x-md">
+        <q-btn
+          v-if="selected.length > 0"
+          color="blue-9"
+          text-color="grey-2"
+          dense
+          no-caps
+          :label="selected.length === 1 ? 'Accept' : 'Accept All'"
+          @click="handleClick('accept', selected[0].pending_transaction_id)"
+        />
+        <q-btn
+          v-if="selected.length > 0"
+          color="red"
+          text-color="grey-2"
+          dense
+          no-caps
+          :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
+          @click="handleClick('cancel', selected[0].pending_transaction_id)"
+        />
+        <q-input
+          square
+          outlined
+          dense
+          debounce="300"
+          color="primary"
+          v-model="filter"
+        >
+          <template v-slot:prepend>
+            <q-icon name="person_search" />
+          </template>
+        </q-input>
+      </div>
     </template>
   </q-table>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
+import { api } from 'src/boot/axios'
+import { SessionStorage } from 'quasar'
+import { socket } from 'src/utils/socket';
 
 defineComponent({
   name: 'BorrowComponent',
@@ -59,154 +65,125 @@ defineComponent({
 
 const filter = ref('');
 const selected = ref([]);
-const actionLabel = ref('All');
+
+interface PendingTransactions {
+  pending_transaction_id: number;
+  title: string;
+  fullname: string;
+  transaction_type: string;
+  status: string;
+  request_date: string;
+  approve_date: string;
+}
 
 const columns = [
   {
-    name: 'desc',
+    name: 'book',
     required: true,
-    label: 'Dessert (100g serving)',
+    label: 'Book',
     align: 'left',
-    field: (row: { name: any }) => row.name,
-    format: (val: any) => `${val}`,
+    field: 'title',
     sortable: true,
   },
   {
-    name: 'calories',
+    name: 'fullname',
     align: 'center',
-    label: 'Calories',
-    field: 'calories',
+    label: 'Fullname',
+    field: 'fullname',
     sortable: true,
   },
-  { name: 'fat', label: 'Fat (g)', field: 'fat', sortable: true },
-  { name: 'carbs', label: 'Carbs (g)', field: 'carbs' },
-  { name: 'protein', label: 'Protein (g)', field: 'protein' },
-  { name: 'sodium', label: 'Sodium (mg)', field: 'sodium' },
   {
-    name: 'calcium',
-    label: 'Calcium (%)',
-    field: 'calcium',
-    sortable: true,
-    sort: (a: string, b: string) => parseInt(a, 10) - parseInt(b, 10),
+    name: 'transaction_type',
+    label: 'Transaction Type',
+    field: 'transaction_type',
+    sortable: true
   },
   {
-    name: 'iron',
-    label: 'Iron (%)',
-    field: 'iron',
+    name: 'status',
+    label: 'Status',
+    field: 'status',
     sortable: true,
-    sort: (a: string, b: string) => parseInt(a, 10) - parseInt(b, 10),
+  },
+  {
+    name: 'request_date',
+    label: 'Request Date',
+    field: 'request_date',
+    sortable: true,
+  },
+  {
+    name: 'approve_date',
+    label: 'Approve Date',
+    field: 'approve_date',
+    sortable: true,
   },
 ];
 
-const rows = [
-  {
-    name: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6.0,
-    carbs: 24,
-    protein: 4.0,
-    sodium: 87,
-    calcium: '14%',
-    iron: '1%',
-  },
-  {
-    name: 'Ice cream sandwich',
-    calories: 237,
-    fat: 9.0,
-    carbs: 37,
-    protein: 4.3,
-    sodium: 129,
-    calcium: '8%',
-    iron: '1%',
-  },
-  {
-    name: 'Eclair',
-    calories: 262,
-    fat: 16.0,
-    carbs: 23,
-    protein: 6.0,
-    sodium: 337,
-    calcium: '6%',
-    iron: '7%',
-  },
-  {
-    name: 'Cupcake',
-    calories: 305,
-    fat: 3.7,
-    carbs: 67,
-    protein: 4.3,
-    sodium: 413,
-    calcium: '3%',
-    iron: '8%',
-  },
-  {
-    name: 'Gingerbread',
-    calories: 356,
-    fat: 16.0,
-    carbs: 49,
-    protein: 3.9,
-    sodium: 327,
-    calcium: '7%',
-    iron: '16%',
-  },
-  {
-    name: 'Jelly bean',
-    calories: 375,
-    fat: 0.0,
-    carbs: 94,
-    protein: 0.0,
-    sodium: 50,
-    calcium: '0%',
-    iron: '0%',
-  },
-  {
-    name: 'Lollipop',
-    calories: 392,
-    fat: 0.2,
-    carbs: 98,
-    protein: 0,
-    sodium: 38,
-    calcium: '0%',
-    iron: '2%',
-  },
-  {
-    name: 'Honeycomb',
-    calories: 408,
-    fat: 3.2,
-    carbs: 87,
-    protein: 6.5,
-    sodium: 562,
-    calcium: '0%',
-    iron: '45%',
-  },
-  {
-    name: 'Donut',
-    calories: 452,
-    fat: 25.0,
-    carbs: 51,
-    protein: 4.9,
-    sodium: 326,
-    calcium: '2%',
-    iron: '22%',
-  },
-  {
-    name: 'KitKat',
-    calories: 518,
-    fat: 26.0,
-    carbs: 65,
-    protein: 7,
-    sodium: 54,
-    calcium: '12%',
-    iron: '6%',
-  },
-];
+const rows = ref<PendingTransactions>([]);
 
-const handleClick = (items: object) => {
-  console.log(items);
+const getSelectedString = () => {
+  return selected.value.length === 0
+    ? ''
+    : `${selected.value.length} record${
+        selected.value.length > 1 ? 's' : ''
+      } selected of ${rows.value.length}`;
 };
 
-const onItemClick = (action: string) => {
-  actionLabel.value = action;
-  filter.value = action === 'all' ? '' : action;
+
+const getAllPendingBorrowed = async () => {
+  try {
+      const response = await api.post('/transactions/all', { option: 'Borrowed' }, {
+        headers: {
+          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        }
+      })
+      if (response.data) {
+        rows.value.push(response.data)
+      }
+  } catch (error) {
+    throw error;
+  }
 };
+
+const handleClick = async (option: string, transaction_id: number) => {
+  try {
+    let endpoint = '';
+    console.log(transaction_id)
+    switch (option) {
+      case 'accept':
+        endpoint = '/transaction/approve'
+        break;
+      case 'cancel':
+        endpoint = '/transaction/cancel'
+        break;
+
+      default:
+        throw new Error('unknown option')
+        break;
+    }
+    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
+      headers: {
+        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+      }
+    });
+    rows.value = [];
+    selected.value = [];
+    getAllPendingReservation();
+    console.log(response.data)
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+onMounted(() => {
+  getAllPendingBorrowed();
+
+  socket.on("new_notification", (data) => {
+    if (data) {
+      getAllPendingBorrowed();
+    }
+  })
+})
+
 </script>

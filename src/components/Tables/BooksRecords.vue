@@ -44,13 +44,12 @@
 import { defineComponent, onMounted, ref } from 'vue';
 import IOldResources from 'src/models/oldResources';
 import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import { SessionStorage } from 'quasar';
 
 defineComponent({
   name: 'OldResources',
 });
 
-const $q = useQuasar();
 const rows = ref<IOldResources[]>([]);
 const filter = ref(null);
 
@@ -131,9 +130,10 @@ const columns: any = [
 
 const fetchResources = async () => {
   try {
-    const response = await api.get('/get/all/books/inventory', {
+  console.log(SessionStorage.getItem('token'))
+    const response = await api.post('/get/all/books/inventory', { limit: 0 }, {
       headers: {
-        Authorization: `Bearer ${$q.sessionStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
       },
     });
 

@@ -14,7 +14,7 @@
       sortBy: 'name',
     }"
   >
-    <template v-slot:top>
+    <template v-slot:body-cell-button="{ row, col }">
       <span class="text-h6 text-bold q-pr-md">Reservations for this week</span>
       <q-space />
       <div class="row q-gutter-x-md">
@@ -51,35 +51,15 @@
       </div>
     </template>
   </q-table>
+
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import { api } from 'src/boot/axios'
-import { SessionStorage } from 'quasar';
-import { socket } from 'src/utils/socket'
-
-defineComponent({
-  name: 'ReservationComponent',
-});
-
-const filter = ref('');
-const selected = ref([]);
-
-interface PendingTransactions {
-  pending_transaction_id: number;
-  title: string;
-  fullname: string;
-  transaction_type: string;
-  status: string;
-  request_date: string;
-  approve_date: string;
-}
 
 const columns = [
   {
     name: 'book',
-    required: true,
+  required: true,
     label: 'Book',
     align: 'left',
     field: 'title',
@@ -118,68 +98,15 @@ const columns = [
   },
 ];
 
-const rows = ref<PendingTransactions>([]);
-
-const getSelectedString = () => {
-  return selected.value.length === 0
-    ? ''
-    : `${selected.value.length} record${
-        selected.value.length > 1 ? 's' : ''
-      } selected of ${rows.value.length}`;
+export interface CheckOutProps {
+  rows: object;
 };
 
-const getAllPendingReservation = async () => {
-  try {
-      const response = await api.post('/transactions/all', { option: 'Reserved' }, {
-        headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
-        }
-      })
-      if (response.data) {
-        rows.value.push(response.data)
-      }
-  } catch (error) {
-    throw error;
-  }
+withDefaults(defineProps<CheckOutProps>(), {
+  rows: [],
+});
+
+const handleClick = (option: string, value: any) => {
+  console.log(value)
 }
-
-const handleClick = async (option: string, transaction_id: number) => {
-  try {
-    let endpoint = '';
-    console.log(transaction_id)
-    switch (option) {
-      case 'accept':
-        endpoint = '/transaction/approve'
-        break;
-      case 'cancel':
-        endpoint = '/transaction/cancel'
-        break;
-
-      default:
-        throw new Error('unknown option')
-        break;
-    }
-    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
-      headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
-      }
-    });
-    rows.value = [];
-    selected.value = [];
-    getAllPendingReservation();
-    console.log(response.data)
-  } catch (error) {
-    throw error;
-  }
-};
-
-onMounted(() => {
-  getAllPendingReservation();
-
-  socket.on("new_notification", (data) => {
-    if (data) {
-      getAllPendingReservation();
-    }
-  })
-})
 </script>

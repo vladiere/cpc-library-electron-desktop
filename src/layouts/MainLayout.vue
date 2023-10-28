@@ -17,6 +17,36 @@
         </q-toolbar-title>
 
         <div class="row q-gutter-x-lg text-uppercase content-center">
+          <div class="row relative-position items-center q-gutter-x-xs cursor-pointer">
+            <q-badge v-if="unReadCounts > 0" color="negative" floating>{{ unReadCounts }}</q-badge>
+            <q-btn-dropdown
+              flat
+              rounded
+              dense
+              :dropdown-icon="unReadCounts > 0 ? 'mdi-bell-ring' : 'mdi-bell-outline'"
+              :color="unReadCounts > 0 ? 'warning' : undefined"
+              no-icon-animation
+            >
+              <q-virtual-scroll
+                style="max-height: 300px; overflow-x: hidden; max-width: 450px"
+                :items="notifications"
+                separator
+                v-slot="{ item, index }"
+              >
+                <ListNotifications :key="index" v-bind="item" />
+              </q-virtual-scroll>
+                <div v-if="notifications.length === 0" class="column items-center q-pa-md text-grey-7">
+                  Empty notifications
+                </div>
+                <div v-if="notifications.length > 0" class="column absolute-bottom-right ">
+                  <q-icon name="mdi-broom" size="2em" color="blue-9" class="cursor-pointer" @click="readAllNotifications">
+                    <q-tooltip class="bg-grey-10 text-grey-2" :delay="300">
+                     Read all
+                    </q-tooltip>
+                  </q-icon>
+                </div>
+            </q-btn-dropdown>
+          </div>
           <div class="row items-center q-gutter-x-xs cursor-pointer">
             <q-btn
               flat
@@ -25,23 +55,6 @@
               label="stats"
               to="/stats"
             />
-          </div>
-          <div class="row items-center q-gutter-x-xs cursor-pointer">
-            <q-btn-dropdown
-              label="notifications"
-              flat
-              icon="fa-regular fa-bell"
-              dropdown-icon="mdi-chevron-down"
-            >
-              <q-virtual-scroll
-                style="max-height: 300px; overflow-x: hidden"
-                :items="notifications"
-                separator
-                v-slot="{ item, index }"
-              >
-                <ListNotifications :key="index" v-bind="item" />
-              </q-virtual-scroll>
-            </q-btn-dropdown>
           </div>
           <div class="row items-center q-gutter-x-xs cursor-pointer">
             <q-btn
@@ -100,19 +113,19 @@ import { useRoute, useRouter } from 'vue-router';
 import appLogo from 'src/assets/applogo.png';
 import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import { SessionStorage } from 'quasar';
 import ListNotifications, {
   NotificationsProps,
 } from 'src/components/Notify/ListNotifications.vue';
 import FooterComponent from 'src/components/Footer/FooterComponent.vue';
 import jwt_decode from 'jwt-decode';
 import IDecodedModel from 'src/models/decodedModel';
+import { socket } from 'src/utils/socket'
 
 const route = useRoute();
 const router = useRouter();
 const routeName = ref<unknown>('');
 const librarianStore = useLibrarianDataStore();
-const $q = useQuasar();
 const loading = ref(true);
 
 const essentialLinks: EssentialLinkProps[] = [
@@ -142,6 +155,11 @@ const essentialLinks: EssentialLinkProps[] = [
     link: '/circulations',
   },
   {
+    title: 'checked in & out',
+    icon: 'mdi-notebook-check-outline',
+    link: '/checkedin_out'
+  },
+  {
     title: 'catalogue',
     icon: 'mdi-bookshelf',
     link: '/catalogue',
@@ -165,6 +183,8 @@ const essentialLinks: EssentialLinkProps[] = [
 ];
 
 const leftDrawerOpen = ref(false);
+const notifications = ref<NotificationsProps>([])
+const unReadCounts = ref(0);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -173,7 +193,7 @@ function toggleLeftDrawer() {
 const getLibrarianDetails = async () => {
   try {
     const decodedToken: IDecodedModel = jwt_decode(
-      $q.sessionStorage.getItem('token') as string
+      SessionStorage.getItem('token') as string
     );
 
     const response = await api.post(
@@ -182,7 +202,7 @@ const getLibrarianDetails = async () => {
       {
         headers: {
           Authorization: `Bearer ${
-            $q.sessionStorage.getItem('token') as string
+            SessionStorage.getItem('token') as string
           }`,
         },
       }
@@ -195,60 +215,23 @@ const getLibrarianDetails = async () => {
   }
 };
 
-const notifications: NotificationsProps[] = [
-  {
-    id: 1,
-    fullname: 'John Doe',
-    message: 'You have a new message.',
-    time: 'now',
-    status: 'unread',
-  },
-  {
-    id: 2,
-    fullname: 'Alice Smith',
-    message: 'Meeting at 3 PM.',
-    time: '1 hour ago',
-    status: 'read',
-  },
-  {
-    id: 3,
-    fullname: 'Bob Johnson',
-    message: "Don't forget to submit your report.",
-    time: '2 hours ago',
-    status: 'unread',
-  },
-  {
-    id: 4,
-    fullname: 'Emily Brown',
-    message: 'New project updates.',
-    time: '3 hours ago',
-    status: 'read',
-  },
-  {
-    id: 5,
-    fullname: 'Michael Lee',
-    message: 'Lunch with the team tomorrow.',
-    time: '1 day ago',
-    status: 'read',
-  },
-  {
-    id: 6,
-    fullname: 'Sarah Wilson',
-    message: 'Reminder: Weekly standup meeting.',
-    time: '2 days ago',
-    status: 'unread',
-  },
-  {
-    id: 7,
-    fullname: 'Dphyr',
-    message: 'Borrowing the books of us.',
-    time: '1 week ago',
-    status: 'unread',
-  },
-];
+const librarianNotifications = async () => {
+  try {
+    const response = await api.get('/notifications/librarian', {
+      headers: {
+        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+      }
+    })
+    notifications.value = response.data;
+    unReadCounts.value = notifications.value.filter((item: any) => item.status === 'unread').length;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 // Sort the notifications based on the "status" property
-notifications.sort((a, b) => {
+notifications.value.sort((a, b) => {
   // Convert status values to lowercase for case-insensitive sorting
   const statusA = a.status.toLowerCase();
   const statusB = b.status.toLowerCase();
@@ -259,9 +242,30 @@ notifications.sort((a, b) => {
   return 0;
 });
 
+const readAllNotifications = async () => {
+  try {
+    await api.get('/notifications/clear', {
+      headers: {
+        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+      }
+    });
+    notifications.value.filter((item: any) => item.status = 'read')
+    unReadCounts.value = 0;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
 onMounted(() => {
   getLibrarianDetails();
+  librarianNotifications();
 
+  socket.on("new_notification", (data) => {
+    if (data) {
+      librarianNotifications();
+    }
+  })
   routeName.value = route.name;
 });
 
