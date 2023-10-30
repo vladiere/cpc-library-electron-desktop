@@ -3,7 +3,7 @@
     <!-- content -->
     <q-tabs v-model="tab" align="justify" narrow-indicator>
       <q-tab class="text-grey-8" name="add" label="Add Resources" />
-      <q-tab class="text-grey-8" name="manage" label="Manage Resources" />
+      <q-tab class="text-grey-8" name="manage" label="Manage Resources" v-if="librarianStore.privilege === 'admin'" />
     </q-tabs>
     <div class="q-gutter-y-sm">
       <q-tab-panels
@@ -29,10 +29,12 @@
 import { defineComponent, ref } from 'vue';
 import AddResources from 'src/components/Resources/AddResources.vue';
 import ManageResources from 'src/components/Resources/ManageResources.vue';
+import { useLibrarianDataStore } from 'src/stores/user';
 
 defineComponent({
   name: 'ResourcesPage',
 });
 
 const tab = ref('add');
+const librarianStore = useLibrarianDataStore();
 </script>

@@ -4,8 +4,6 @@
     :rows="rows"
     :columns="columns"
     row-key="name"
-    :selected-rows-label="getSelectedString"
-    selection="multiple"
     class="text-capitalize"
     :filter="filter"
     v-model:selected="selected"
@@ -25,7 +23,7 @@
           dense
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
-          @click="handleClick('accept', selected[0].pending_transaction_id)"
+          @click="handleClick(row,col)"
         />
         <q-btn
           v-if="selected.length > 0"
@@ -34,7 +32,7 @@
           dense
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
-          @click="handleClick('cancel', selected[0].pending_transaction_id)"
+          @click="handleClick(row,col)"
         />
         <q-input
           square
@@ -55,6 +53,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+
+const filter = ref('');
 
 const columns = [
   {
@@ -99,14 +100,14 @@ const columns = [
 ];
 
 export interface CheckOutProps {
-  rows: object;
+  rows: any;
 };
 
 withDefaults(defineProps<CheckOutProps>(), {
   rows: [],
 });
 
-const handleClick = (option: string, value: any) => {
-  console.log(value)
+const handleClick = (row_data: any, col_data: any) => {
+  console.log(row_data, col_data)
 }
 </script>

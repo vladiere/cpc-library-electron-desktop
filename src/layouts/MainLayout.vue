@@ -18,7 +18,7 @@
 
         <div class="row q-gutter-x-lg text-uppercase content-center">
           <div class="row relative-position items-center q-gutter-x-xs cursor-pointer">
-            <q-badge v-if="unReadCounts > 0" color="negative" floating>{{ unReadCounts }}</q-badge>
+            <q-badge v-if="unReadCounts > 0" color="negative" class="z-top" floating>{{ unReadCounts }}</q-badge>
             <q-btn-dropdown
               flat
               rounded
@@ -128,59 +128,62 @@ const routeName = ref<unknown>('');
 const librarianStore = useLibrarianDataStore();
 const loading = ref(true);
 
-const essentialLinks: EssentialLinkProps[] = [
+const essentialLinks = ref<EssentialLinkProps>([
   {
     title: 'dashboard',
     icon: 'mdi-abacus',
     link: '/dashboard',
+    visibility: true,
   },
   {
     title: 'user profile',
     icon: 'mdi-account-tie',
     link: '/users',
+    visibility: true,
   },
   {
     title: 'table list',
     icon: 'mdi-table-of-contents',
     link: '/tables',
+    visibility: true,
   },
   {
     title: 'resources',
     icon: 'mdi-book-open-page-variant-outline',
     link: '/resources',
+    visibility: true,
   },
   {
     title: 'circulations',
     icon: 'mdi-book-check',
     link: '/circulations',
+    visibility: true,
   },
   {
-    title: 'checked in & out',
+    title: 'checked out & return',
     icon: 'mdi-notebook-check-outline',
-    link: '/checkedin_out'
+    link: '/checkedout_return',
+    visibility: true,
   },
   {
     title: 'catalogue',
     icon: 'mdi-bookshelf',
     link: '/catalogue',
+    visibility: true,
   },
   {
     title: 'acquisitions',
-
     icon: 'mdi-cart-outline',
     link: '/acquisitions',
-  },
-  {
-    title: 'notifications',
-    icon: 'mdi-bell-outline',
-    link: '/notifications',
+    visibility: true,
   },
   {
     title: 'logout',
     icon: 'mdi-logout',
     link: 'logout',
+    visibility: true,
   },
-];
+]);
 
 const leftDrawerOpen = ref(false);
 const notifications = ref<NotificationsProps>([])
@@ -209,6 +212,11 @@ const getLibrarianDetails = async () => {
     );
 
     librarianStore.initLibrarian(response.data[0]);
+
+    const acquisitions = essentialLinks.value.find((item: any) => item.title === 'acquisitions')
+    acquisitions.visibility = librarianStore.privilege === 'admin';
+    const catalogue = essentialLinks.value.find((item: any) => item.title === 'catalogue')
+    catalogue.visibility = librarianStore.privilege === 'admin';
   } catch (error: any) {
     router.push('/');
     throw new Error(error);

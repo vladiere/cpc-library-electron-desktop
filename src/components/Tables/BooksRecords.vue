@@ -130,7 +130,6 @@ const columns: any = [
 
 const fetchResources = async () => {
   try {
-  console.log(SessionStorage.getItem('token'))
     const response = await api.post('/get/all/books/inventory', { limit: 0 }, {
       headers: {
         Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,

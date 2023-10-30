@@ -37,6 +37,7 @@ import { api } from 'src/boot/axios';
 import { SessionStorage } from 'quasar';
 
 const totalActive = ref(0);
+const totalVisit = ref(0);
 const cardsComponent = ref<CardsProps[]>([
   {
     title: 'trend books',
@@ -57,7 +58,7 @@ const cardsComponent = ref<CardsProps[]>([
     icon: 'mdi-cached',
     img: '../../src/assets/icons/recent-visit.png',
     label: 'Updated now',
-    count: 20,
+    count: totalVisit.value,
   },
 ]);
 
@@ -85,9 +86,11 @@ onMounted(() => {
 
   getUserActive();
   socket.on("new_connected", (data) => {
-    totalActive.value += 1;
-    const onlineUsersCard = cardsComponent.value.find(card => card.title === 'online users');
-    onlineUsersCard.count = totalActive.value;
+    if (data) {
+      totalActive.value += 1;
+      const onlineUsersCard = cardsComponent.value.find(card => card.title === 'online users');
+      onlineUsersCard.count = totalActive.value;
+    }
   })
 
   socket.on("user_logout", () => {
@@ -97,11 +100,19 @@ onMounted(() => {
   })
 
   socket.on("disconnected", () => {
-    totalActive.value -= 1;
+    if (totalActive.value !== 0) {
+      totalActive.value -= 1;
+    }
     const onlineUsersCard = cardsComponent.value.find(card => card.title === 'online users');
     onlineUsersCard.count = totalActive.value;
   })
 
+  socket.on("new_visitor", () => {
+    const recentVisitCard = cardsComponent.value.find(card => card.title === 'recent visits');
+    totalVisit.value += 1;
+    recentVisitCard.count = totalVisit.value;
+    console.log("new visitor");
+  })
 
 })
 </script>

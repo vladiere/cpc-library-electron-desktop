@@ -207,6 +207,7 @@
         <div class="col column q-mx-md">
           <span class="self-center text-h4 q-my-md">Library Staff</span>
           <q-btn
+            v-if="librarianStore.privilege === 'admin'"
             color="primary"
             label="Register Staff"
             rounded

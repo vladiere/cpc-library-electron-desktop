@@ -2,6 +2,7 @@
   <q-item
     clickable
     v-ripple
+    v-if="visibility"
     :to="link"
     @click="handleClick(link)"
     active-class="text-grey-1"
@@ -26,6 +27,7 @@ export interface EssentialLinkProps {
   caption?: string;
   link?: string;
   icon?: string;
+  visibility: false;
 }
 
 withDefaults(defineProps<EssentialLinkProps>(), {
@@ -33,6 +35,7 @@ withDefaults(defineProps<EssentialLinkProps>(), {
   caption: '',
   link: '#',
   icon: '',
+  visibility: false
 });
 
 const librarianStore = useLibrarianDataStore();
@@ -59,4 +62,5 @@ const handleClick = async (link: string) => {
     }
   }
 };
+
 </script>

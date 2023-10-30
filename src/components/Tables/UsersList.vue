@@ -48,7 +48,15 @@ const columns: any = [
     field: 'email_address',
     align: 'left',
     sortable: true
-  }];
+  },
+  {
+    name: 'status',
+    label: 'Status',
+    field: 'user_status',
+    align: 'center',
+    sortable: true
+  },
+];
 
 const rows = ref<UserDetails>([]);
 

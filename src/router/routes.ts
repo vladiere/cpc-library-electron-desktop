@@ -87,13 +87,14 @@ if (Platform.is.electron) {
       ],
     },
     {
-      path: '/checkedin_out',
+      path: '/checkedout_return',
       component: () => import('layouts/MainLayout.vue'),
       children: [
         {
           path: '',
           name: 'Check In & Out',
-          component: () => import('pages/CheckInOut/CheckInOutPage.vue'),
+          component: () =>
+            import('pages/CheckOutReturn/CheckOutReturnPage.vue'),
         },
       ],
     },

@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios'
-import { SessionStorage } from 'quasar'
+import { SessionStorage, Notify } from 'quasar'
 import { socket } from 'src/utils/socket';
 
 defineComponent({
@@ -167,8 +167,13 @@ const handleClick = async (option: string, transaction_id: number) => {
     });
     rows.value = [];
     selected.value = [];
-    getAllPendingReservation();
-    console.log(response.data)
+    getAllPendingBorrowed();
+    socket.emit("notifications", transaction_id)
+    Notify.create({
+      message: response.data.message,
+      timeout: 1500,
+      position: 'top-right'
+    })
   } catch (error) {
     throw error;
   }

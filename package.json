@@ -2,7 +2,7 @@
   "name": "cpc-library-electron",
   "version": "0.0.1",
   "description": "A CPC Library for desktop using electron",
-  "productName": "CPC Library",
+  "productName": "CPC Library Admin",
   "author": "vladiere <ruthakaza@gmail.com>",
   "private": true,
   "scripts": {
