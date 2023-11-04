@@ -114,7 +114,7 @@ const rows = ref([]);
 const getAllCheckedOutReservation = async () => {
   try {
       const response = await api.post('/transaction/book/all', {
-        option: 'Returned',
+        option: 'Checked Out',
         transaction_status: 'Active'
       }, {
         headers: {
@@ -133,7 +133,12 @@ const getAllCheckedOutReservation = async () => {
 const handleClick = async (transaction_id: number) => {
   console.log(transaction_id)
   try {
-    const response = await api.post("/transaction/book/check_return", { transaction_id: transaction_id, transaction_type: 'Returned', transaction_status: 'Completed' }, {
+    const response = await api.post("/transaction/book/check_return",
+    {
+      transaction_id: transaction_id,
+      transaction_type: 'Returned',
+      transaction_status: 'Completed'
+    }, {
       headers: {
         Authorization: `Bearer ${SessionStorage.getItem('token')}`
       }
