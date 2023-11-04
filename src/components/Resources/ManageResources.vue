@@ -5,7 +5,6 @@
     :rows="rows"
     :columns="columns"
     row-key="name"
-    :loading="loading"
     :pagination="{
       rowsPerPage: 10,
       sortBy: 'name',
@@ -60,17 +59,17 @@
 </template>
 
 <script setup lang="ts">
-import { useQuasar } from 'quasar';
+import { SessionStorage, Loading } from 'quasar';
 import { api } from 'src/boot/axios';
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+import { SpinnerIos } from 'src/utils/loading'
 
 defineComponent({
   name: 'ManageResources',
 });
 
 const router = useRouter();
-const $q = useQuasar();
 const loading = ref(false);
 const filter = ref('');
 
@@ -180,13 +179,9 @@ const fetchData = async () => {
   try {
     const response = await api.get('/get/all/books', {
       headers: {
-        Authorization: `Bearer ${$q.sessionStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
       },
     });
-
-    setTimeout(() => {
-      loading.value = false;
-    }, 2000);
 
     rows.value = response.data;
   } catch (error: any) {
@@ -196,6 +191,11 @@ const fetchData = async () => {
 };
 
 onMounted(() => {
+  SpinnerIos(2300, 'Loading...');
   fetchData();
 });
+
+onBeforeUnmount(() => {
+  rows.value = [];
+})
 </script>

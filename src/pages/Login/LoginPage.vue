@@ -31,7 +31,6 @@
       <q-form
         class="column q-gutter-sm"
         greedy
-        autofocus
         @submit.prevent="handleSubmit"
       >
         <q-input

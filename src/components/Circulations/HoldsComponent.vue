@@ -3,7 +3,7 @@
     bordered
     :rows="rows"
     :columns="columns"
-    row-key="name"
+    row-key="pending_transaction_id"
     :selected-rows-label="getSelectedString"
     selection="multiple"
     class="text-capitalize"
@@ -137,7 +137,8 @@ const getAllPendingHolds = async () => {
         }
       })
       if (response.data) {
-        rows.value.push(response.data)
+        rows.value = [];
+        rows.value = response.data;
       }
   } catch (error) {
     throw error;

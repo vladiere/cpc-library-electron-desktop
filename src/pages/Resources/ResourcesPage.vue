@@ -26,15 +26,21 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
-import AddResources from 'src/components/Resources/AddResources.vue';
-import ManageResources from 'src/components/Resources/ManageResources.vue';
+import { defineComponent, ref, defineAsyncComponent } from 'vue';
 import { useLibrarianDataStore } from 'src/stores/user';
 
 defineComponent({
   name: 'ResourcesPage',
 });
 
+const ManageResources = defineAsyncComponent(() =>
+  import('components/Resources/ManageResources.vue')
+);
+const AddResources = defineAsyncComponent(() =>
+  import('components/Resources/AddResources.vue')
+);
+
 const tab = ref('add');
 const librarianStore = useLibrarianDataStore();
+
 </script>

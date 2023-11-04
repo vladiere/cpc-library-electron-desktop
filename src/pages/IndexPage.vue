@@ -42,21 +42,21 @@ const cardsComponent = ref<CardsProps[]>([
   {
     title: 'trend books',
     icon: 'mdi-cached',
-    img: '../../src/assets/icons/trend.png',
+    img: 'mdi-trending-up',
     label: 'Updated now',
     count: 25,
   },
   {
     title: 'new register',
     icon: 'mdi-cached',
-    img: '../../src/assets/icons/account-plus.png',
+    img: 'mdi-account-multiple-plus',
     label: 'Updated now',
     count: 4,
   },
   {
     title: 'recent visits',
     icon: 'mdi-cached',
-    img: '../../src/assets/icons/recent-visit.png',
+    img: 'mdi-history',
     label: 'Updated now',
     count: totalVisit.value,
   },
@@ -73,7 +73,7 @@ const getUserActive = async () => {
     cardsComponent.value.push({
       title: 'online users',
       icon: 'mdi-cached',
-      img: '../../src/assets/icons/web.png',
+      img: 'mdi-account-group',
       label: 'Updated now',
       count: totalActive.value,
     })

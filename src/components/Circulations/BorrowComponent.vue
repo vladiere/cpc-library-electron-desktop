@@ -7,7 +7,7 @@
     selection="multiple"
     :selected-rows-label="getSelectedString"
     v-model:selected="selected"
-    row-key="name"
+    row-key="pending_transaction_id"
     :filter="filter"
     :pagination="{
       rowsPerPage: 7,
@@ -25,7 +25,7 @@
           dense
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
-          @click="handleClick('accept', selected[0].pending_transaction_id)"
+          @click="handleClick('accept', selected)"
         />
         <q-btn
           v-if="selected.length > 0"
@@ -34,7 +34,7 @@
           dense
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
-          @click="handleClick('cancel', selected[0].pending_transaction_id)"
+          @click="handleClick('cancel', selected)"
         />
         <q-input
           square
@@ -96,29 +96,33 @@ const columns = [
     name: 'transaction_type',
     label: 'Transaction Type',
     field: 'transaction_type',
+    align: 'left',
     sortable: true
   },
   {
     name: 'status',
     label: 'Status',
     field: 'status',
+    align: 'left',
     sortable: true,
   },
   {
     name: 'request_date',
     label: 'Request Date',
     field: 'request_date',
+    align: 'left',
     sortable: true,
   },
   {
     name: 'approve_date',
     label: 'Approve Date',
     field: 'approve_date',
+    align: 'left',
     sortable: true,
   },
 ];
 
-const rows = ref<PendingTransactions>([]);
+const rows = ref([]);
 
 const getSelectedString = () => {
   return selected.value.length === 0
@@ -137,42 +141,45 @@ const getAllPendingBorrowed = async () => {
         }
       })
       if (response.data) {
-        rows.value.push(response.data)
+        rows.value = [];
+        rows.value = response.data;
       }
   } catch (error) {
     throw error;
   }
 };
 
-const handleClick = async (option: string, transaction_id: number) => {
+const handleClick = async (option: string, data_set: any) => {
   try {
-    let endpoint = '';
-    console.log(transaction_id)
-    switch (option) {
-      case 'accept':
-        endpoint = '/transaction/approve'
-        break;
-      case 'cancel':
-        endpoint = '/transaction/cancel'
-        break;
+    data_set.map(async (item: any) => {
+      let endpoint = '';
+      switch (option) {
+        case 'accept':
+          endpoint = '/transaction/approve'
+          break;
+        case 'cancel':
+          endpoint = '/transaction/cancel'
+          break;
 
-      default:
-        throw new Error('unknown option')
-        break;
-    }
-    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
-      headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        default:
+          throw new Error('unknown option')
+          break;
       }
-    });
-    rows.value = [];
-    selected.value = [];
-    getAllPendingBorrowed();
-    socket.emit("notifications", transaction_id)
-    Notify.create({
-      message: response.data.message,
-      timeout: 1500,
-      position: 'top-right'
+      const response = await api.post(endpoint, { transaction_id: item.pending_transaction_id }, {
+        headers: {
+          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        }
+      });
+      selected.value = [];
+      getAllPendingBorrowed();
+
+      socket.emit("notifications", item.pending_transaction_id);
+
+      Notify.create({
+        message: response.data.message,
+        timeout: 1500,
+        position: 'top-right'
+      })
     })
   } catch (error) {
     throw error;

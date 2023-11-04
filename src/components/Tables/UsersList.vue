@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue';
 import { api } from 'src/boot/axios';
 import { SessionStorage } from 'quasar';
 
@@ -75,5 +75,9 @@ const getUserDetails = async () => {
 
 onMounted(() => {
   getUserDetails();
+})
+
+onBeforeUnmount(() => {
+  rows.value = [];
 })
 </script>

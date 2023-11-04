@@ -29,7 +29,7 @@ const loginApi = axios.create({ baseURL: 'http://localhost:3000/api/' });
 const refreshToken = async () => {
   try {
     const response = await api.post('/refresh/user/tokens', {
-      refreshToken: SessionStorage.getItem('refresh') as string,
+      refreshToken: SessionStorage.getItem('refresh'),
     });
 
     return response.data[0];

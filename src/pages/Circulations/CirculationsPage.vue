@@ -1,7 +1,7 @@
 <template>
   <q-page padding class="q-mb-xl">
     <!-- content -->
-    <q-tabs v-model="tab" align="justify" narrow-indicator>
+    <q-tabs v-model="tab" align="justify" >
       <q-tab class="text-grey-8" name="reservations" label="Reservations" />
       <q-tab class="text-grey-8" name="holds" label="Holds" />
       <q-tab class="text-grey-8" name="finesfees" label="Fines and Fees" />
@@ -41,15 +41,23 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
-import Reservations from 'src/components/Circulations/ReservationComponent.vue';
+import { defineComponent, defineAsyncComponent, ref } from 'vue';
 import Holds from 'src/components/Circulations/HoldsComponent.vue';
 import FinesAndFees from 'src/components/Circulations/FinesAndFeesComponent.vue';
 import Borrow from 'src/components/Circulations/BorrowComponent.vue';
 import Renewal from 'src/components/Circulations/RenewalComponent.vue';
+import { SpinnerIos } from 'src/utils/loading';
 
 defineComponent({
   name: 'CirculationsPage',
+});
+
+const Reservations = defineAsyncComponent({
+  loader: () => import('components/Circulations/ReservationComponent.vue'),
+  loadingComponent: SpinnerIos(1100, 'Loading...'),
+  delay: 200,
+  timeout: 2000,
+  suspensible: false
 });
 
 const tab = ref('reservations');

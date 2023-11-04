@@ -34,13 +34,13 @@ module.exports = configure(function (/* ctx */) {
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
-      'ionicons-v4',
+      // 'ionicons-v4',
       'mdi-v5',
-      'fontawesome-v6',
-      'eva-icons',
-      'themify',
-      'line-awesome',
-      'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
+      // 'fontawesome-v6',
+      // 'eva-icons',
+      // 'themify',
+      // 'line-awesome',
+      // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
       'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it
     ],
@@ -98,7 +98,13 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ['Notify', 'SessionStorage', 'LocalStorage', 'Platform'],
+      plugins: [
+        'Notify',
+        'SessionStorage',
+        'LocalStorage',
+        'Platform',
+        'Loading',
+      ],
     },
 
     // animations: 'all', // --- includes all animations

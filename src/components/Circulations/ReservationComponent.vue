@@ -3,7 +3,7 @@
     bordered
     :rows="rows"
     :columns="columns"
-    row-key="name"
+    row-key="pending_transaction_id"
     :selected-rows-label="getSelectedString"
     selection="multiple"
     class="text-capitalize"
@@ -136,7 +136,8 @@ const getAllPendingReservation = async () => {
         }
       })
       if (response.data) {
-        rows.value.push(response.data)
+        rows.value = [];
+        rows.value = response.data
       }
   } catch (error) {
     throw error;
@@ -164,7 +165,6 @@ const handleClick = async (option: string, transaction_id: number) => {
         Authorization: `Bearer ${SessionStorage.getItem('token')}`
       }
     });
-    rows.value = [];
     selected.value = [];
     getAllPendingReservation();
 

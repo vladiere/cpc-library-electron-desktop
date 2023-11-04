@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 import IOldResources from 'src/models/oldResources';
 import { api } from 'src/boot/axios';
 import { SessionStorage } from 'quasar';
@@ -145,4 +145,8 @@ const fetchResources = async () => {
 onMounted(() => {
   fetchResources();
 });
+
+onBeforeUnmount(() => {
+  rows.value = [];
+})
 </script>

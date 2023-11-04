@@ -10,48 +10,50 @@
       >
         <q-tab name="checkedout" label="Checked Out" />
         <q-tab name="return" label="Return" />
+        <q-tab name="history" label="History" />
       </q-tabs>
 
       <q-separator />
 
       <q-tab-panels v-model="tab" animated class="bg-grey-2">
        <q-tab-panel name="checkedout" class="q-pa-none">
-         <CheckOutComponent v-bind="rows" />
+         <CheckedOutComponent />
         </q-tab-panel>
         <q-tab-panel name="return" class="q-pa-none">
-          returns
+          <ReturnComponent />
+        </q-tab-panel>
+        <q-tab-panel name="history" class="q-pa-none">
+          <HistoryReturned />
         </q-tab-panel>
       </q-tab-panels>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
-import { api } from 'src/boot/axios'
-import { SessionStorage } from 'quasar'
-import CheckOutComponent, { CheckOutProps } from 'src/components/CheckedInOut/CheckedOutComponent.vue'
+import { defineComponent, ref, onMounted, defineAsyncComponent } from 'vue'
+import { SpinnerIos } from 'src/utils/loading';
 
 defineComponent({
   name: 'CheckinOutPage'
 });
 
+const CheckedOutComponent = defineAsyncComponent({
+  loader: () => import('components/CheckedInOut/CheckedOutComponent.vue'),
+  loadingComponent: SpinnerIos(1300, 'Loading...'),
+  suspensible: false
+});
+
+const ReturnComponent = defineAsyncComponent({
+  loader: () => import('components/CheckedInOut/ReturnComponent.vue'),
+  loadingComponent: SpinnerIos(1300, 'Loading...'),
+  suspensible: false
+});
+
+const HistoryReturned = defineAsyncComponent({
+  loader: () => import('components/CheckedInOut/HistoryBookComponent.vue'),
+  loadingComponent: SpinnerIos(1300, 'Loading...')
+});
+
 const tab = ref('checkedout');
-const rows = ref<CheckOutProps>([]);
-
-const getAllPendingReservation = async () => {
-  try {
-      const response = await api.post('/transactions/all', { option: 'Approved' }, {
-        headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
-        }
-      })
-      if (response.data) {
-        rows.value.push(response.data)
-      }
-  } catch (error) {
-    throw error;
-  }
-}
-
 
 </script>

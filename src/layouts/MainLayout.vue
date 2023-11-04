@@ -94,13 +94,13 @@
       <router-view />
     </q-page-container>
 
-    <q-footer bordered class="bg-grey-7 text-white">
-      <q-toolbar>
-        <q-toolbar-title>
-          <FooterComponent />
-        </q-toolbar-title>
-      </q-toolbar>
-    </q-footer>
+    <!-- <q-footer bordered class="bg-grey-7 text-white"> -->
+    <!--   <q-toolbar> -->
+    <!--     <q-toolbar-title> -->
+    <!--       <FooterComponent /> -->
+    <!--     </q-toolbar-title> -->
+    <!--   </q-toolbar> -->
+    <!-- </q-footer> -->
   </q-layout>
 </template>
 
@@ -188,6 +188,7 @@ const essentialLinks = ref<EssentialLinkProps>([
 const leftDrawerOpen = ref(false);
 const notifications = ref<NotificationsProps>([])
 const unReadCounts = ref(0);
+const decodedToken: IDecodedModel = jwt_decode(SessionStorage.getItem('token'));
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -195,9 +196,6 @@ function toggleLeftDrawer() {
 
 const getLibrarianDetails = async () => {
   try {
-    const decodedToken: IDecodedModel = jwt_decode(
-      SessionStorage.getItem('token') as string
-    );
 
     const response = await api.post(
       '/get/librarian',

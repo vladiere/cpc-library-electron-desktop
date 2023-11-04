@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mb-lg" :loading="loading">
+  <q-page padding class="q-mb-lg">
     <div class="column">
       <div class="row" style="gap: 25px">
         <div
@@ -235,10 +235,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import StaffComponent, {
-  StaffProps,
-} from 'src/components/UserProfile/StaffComponent.vue';
+import { defineComponent, onMounted, ref, onBeforeUnmount, defineAsyncComponent } from 'vue';
+import { StaffProps } from 'components/UserProfile/StaffComponent.vue';
 import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
 import jwt_decode from 'jwt-decode';
@@ -249,8 +247,11 @@ defineComponent({
   name: 'UserProfile',
 });
 
+const StaffComponent = defineAsyncComponent(() =>
+  import('components/UserProfile/StaffComponent.vue')
+);
+
 const librarianStore = useLibrarianDataStore();
-const loading = ref(true);
 
 const form = ref({
   librarian_id: librarianStore.librarian_id,
@@ -346,9 +347,7 @@ const getLibrarianStaffs = async () => {
 
 onMounted(() => {
   getLibrarianStaffs();
-
-  setTimeout(() => {
-    loading.value = false;
-  }, 2000);
 });
+
+onBeforeUnmount(() => {contacts.value = []})
 </script>

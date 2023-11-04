@@ -26,15 +26,6 @@
           </template>
         </q-input>
     </template>
-    <template v-slot:body-cell-button="{ row, col }">
-      <q-td key="button" :props="col.props">
-        <q-icon name="mdi-clipboard-arrow-left" size="2em" class="cursor-pointer" color="positive" @click="handleClick(row.transaction_id)">
-          <q-tooltip :delay="300" class="bg-grey-10 text-grey-2">
-            Mark as returned
-          </q-tooltip>
-        </q-icon>
-      </q-td>
-    </template>
   </q-table>
 </template>
 
@@ -74,13 +65,6 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'transaction_type',
-    label: 'Transaction Type',
-    field: 'transaction_type',
-    align: 'left',
-    sortable: true
-  },
-  {
     name: 'status',
     label: 'Status',
     field: 'status',
@@ -88,24 +72,11 @@ const columns = [
     sortable: true,
   },
   {
-    name: 'transaction_date',
-    label: 'Request Date',
-    field: 'transaction_date',
+    name: 'last_date',
+    label: 'Date',
+    field: 'last_date',
     align: 'left',
     sortable: true,
-  },
-  {
-    name: 'due_date',
-    label: 'Due Date',
-    field: 'due_date',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'button',
-    label: 'Action',
-    align: 'center',
-    field: 'button'
   },
 ];
 
@@ -115,7 +86,7 @@ const getAllCheckedOutReservation = async () => {
   try {
       const response = await api.post('/transaction/book/all', {
         option: 'Returned',
-        transaction_status: 'Active'
+        transaction_status: 'all'
       }, {
         headers: {
           Authorization: `Bearer ${SessionStorage.getItem('token')}`
@@ -125,26 +96,6 @@ const getAllCheckedOutReservation = async () => {
         rows.value = [];
         rows.value = response.data
       }
-  } catch (error) {
-    throw error;
-  }
-}
-
-const handleClick = async (transaction_id: number) => {
-  console.log(transaction_id)
-  try {
-    const response = await api.post("/transaction/book/check_return", { transaction_id: transaction_id, transaction_type: 'Returned', transaction_status: 'Completed' }, {
-      headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
-      }
-    });
-    getAllCheckedOutReservation();
-    socket.emit("notifications", transaction_id);
-    Notify.create({
-      message: response.data.message,
-      position: 'top-right',
-      timeout: 2300,
-    });
   } catch (error) {
     throw error;
   }

@@ -4,7 +4,7 @@
     style="border-radius: 5px; width: 23%"
   >
     <div class="row justify-between fit">
-      <img :src="img" style="width: 40%" />
+      <q-icon :name="img" size="5rem" color="blue-9" />
 
       <div class="column text-right">
         <span> {{ title }} </span>
