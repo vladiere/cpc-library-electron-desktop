@@ -8,7 +8,6 @@
         name="classification"
         label="Classification Number"
       />
-      <q-tab class="text-grey-7" name="others" label="Others" />
     </q-tabs>
 
     <q-tab-panels
@@ -78,27 +77,6 @@
         </q-virtual-scroll>
       </q-tab-panel>
 
-      <q-tab-panel name="others" class="gutter-md">
-        <div class="text-h6">Formats</div>
-        <div class="column items-start q-gutter-y-md">
-          <q-input v-model="text" label="Add new Format" outlined />
-          <q-btn color="primary" label="Add Format" />
-        </div>
-        <div class="text-h6">Avalable Formats</div>
-
-        <div class="q-ml-xs q-my-md row q-gutter-x-md">
-          <span>No.</span>
-          <span>Format</span>
-        </div>
-        <q-virtual-scroll
-          style="max-height: 300px"
-          :items="ebookFormats"
-          separator
-          v-slot="{ item, index }"
-        >
-          <FormatsComponent :key="index" v-bind="item" />
-        </q-virtual-scroll>
-      </q-tab-panel>
     </q-tab-panels>
   </q-page>
 </template>
@@ -109,9 +87,6 @@ import BookSubject from 'src/components/Catalogue/BookSubject.vue';
 import ClassificationNo, {
   ClassificationProps,
 } from 'src/components/Catalogue/ClassificationNo.vue';
-import FormatsComponent, {
-  FormatsProps,
-} from 'src/components/Catalogue/FormatsComponent.vue';
 import { api } from 'src/boot/axios';
 import { SessionStorage, Notify } from 'quasar';
 import formatDateToHumanReadable from 'src/functions/formattedDated';

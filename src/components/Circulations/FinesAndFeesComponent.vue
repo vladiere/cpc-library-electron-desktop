@@ -89,7 +89,7 @@ const columns = [
   },
   {
     name: 'total_fines_and_fees',
-    label: 'Total Fines and Fees',
+    label: 'Fine amount',
     field: 'total_fines_and_fees',
     align: 'left',
     sortable: true,

@@ -191,7 +191,7 @@ const fetchData = async () => {
 };
 
 onMounted(() => {
-  SpinnerIos(2300, 'Loading...');
+  SpinnerIos(1300, 'Loading...');
   fetchData();
 });
 

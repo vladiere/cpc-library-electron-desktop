@@ -33,7 +33,6 @@ defineComponent({
   name: 'BulkUpload',
 });
 
-const $q = useQuasar();
 const dataToSend = ref([]);
 
 const mapErrors: Record<string, string> = {
