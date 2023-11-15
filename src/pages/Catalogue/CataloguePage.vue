@@ -82,33 +82,36 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import BookSubject from 'src/components/Catalogue/BookSubject.vue';
-import ClassificationNo, {
-  ClassificationProps,
-} from 'src/components/Catalogue/ClassificationNo.vue';
+import { defineComponent, onMounted, ref, defineAsyncComponent, onBeforeUnmount } from 'vue';
+import { ClassificationProps } from 'components/Catalogue/ClassificationNo.vue';
 import { api } from 'src/boot/axios';
-import { SessionStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import formatDateToHumanReadable from 'src/functions/formattedDated';
 
 defineComponent({
   name: 'CataloguePage',
 });
 
-interface RowData {
-  created: string;
-  accession_no: null;
-  book_suject: string;
-  ddc_code: string;
-}
+const BookSubject = defineAsyncComponent({
+  loader: () => import('components/Catalogue/BookSubject.vue'),
+  delay:300,
+  timeout: 2300,
+  suspensible: false
+});
+
+const ClassificationNo = defineAsyncComponent({
+  loader: () => import('components/Catalogue/ClassificationNo.vue'),
+  delay: 350,
+  timeout: 2300,
+  suspensible: false
+});
 
 const tab = ref('booksubj');
-const text = ref('');
 const options = ref([]);
-let dataOptions: any = [];
-const dataArray: any = [];
-const rowsObject = ref<any[]>([]);
-const responseData = ref<any[]>([]);
+let dataOptions: unknown = [];
+const dataArray: unknown = [];
+const rowsObject = ref<object[]>([]);
+const responseData = ref<object[]>([]);
 const newForm = ref({
   accession_id: null,
   book_subject: '',
@@ -162,72 +165,30 @@ const categories: ClassificationProps[] = [
   },
 ];
 
-const ebookFormats: FormatsProps[] = [
-  {
-    id: 1,
-    format: 'PDF',
-  },
-  {
-    id: 2,
-    format: 'EPUB',
-  },
-  {
-    id: 3,
-    format: 'MOBI',
-  },
-  {
-    id: 4,
-    format: 'AZW3',
-  },
-  {
-    id: 5,
-    format: 'TXT',
-  },
-  {
-    id: 6,
-    format: 'HTML',
-  },
-  {
-    id: 7,
-    format: 'CBZ',
-  },
-  {
-    id: 8,
-    format: 'FB2',
-  },
-  {
-    id: 9,
-    format: 'LIT',
-  },
-  {
-    id: 10,
-    format: 'PDB',
-  },
-];
 
 const getBooksList = async () => {
   try {
     const response = await api.get('/get/all/books', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
       },
     });
     responseData.value = response.data;
 
-    response.data.map((item: any) => {
+    response.data.map((item: unknown) => {
       dataOptions.push(item.accession_no);
       dataArray.push({
         accession_id: item.accession_id,
         accession_no: item.accession_no,
       });
     });
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
-const filterFn = (val: any, update: any, abort: any) => {
-  // call abort() at any time if you can't retrieve data somehow
+const filterFn = (val: unknown, update: unknown) => {
+  // call abort() at unknown time if you can't retrieve data somehow
   setTimeout(() => {
     if (val === '') {
       update(() => {
@@ -237,7 +198,7 @@ const filterFn = (val: any, update: any, abort: any) => {
     }
 
     update(() => {
-      options.value = dataOptions.filter((item: any) =>
+      options.value = dataOptions.filter((item: unknown) =>
         item.toString().startsWith(val)
       );
     });
@@ -246,7 +207,7 @@ const filterFn = (val: any, update: any, abort: any) => {
 
 const handleAddSubject = async () => {
   try {
-    dataArray.map((item: any) => {
+    dataArray.map((item: unknown) => {
       if (item.accession_no === form.value.accession_no) {
         newForm.value = { ...form.value, accession_id: item.accession_id };
       }
@@ -257,14 +218,13 @@ const handleAddSubject = async () => {
       { book_catalog: newForm.value },
       {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`,
         },
       }
     );
 
-    console.log(response.data);
     if (response.data.status_code === 201) {
-      responseData.value.map((item: any) => {
+      responseData.value.map((item: unknown) => {
         if (form.value.accession_no === item.accession_no) {
           rowsObject.value.push({
             ...form.value,
@@ -281,7 +241,7 @@ const handleAddSubject = async () => {
         timeout: 2500,
       });
 
-      Object.entries(form.value).map((item: any) => (item.value = ''));
+      Object.entries(form.value).map((item: unknown) => (item.value = ''));
     } else {
       Notify.create({
         message: response.data.message,
@@ -290,8 +250,8 @@ const handleAddSubject = async () => {
         timeout: 2500,
       });
     }
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -299,22 +259,27 @@ const getAllCatalog = async () => {
   try {
     const response = await api.get('/get/all/book/catalog', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`,
       },
     });
-    const mutatedData = response.data.map((item: any) => ({
+    const mutatedData = response.data.map((item: unknown) => ({
       ...item,
       created: formatDateToHumanReadable(item.created),
     }));
 
     rowsObject.value = mutatedData;
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
-onMounted(() => {
-  getBooksList();
-  getAllCatalog();
+onMounted(async () => {
+  await getBooksList();
+  await getAllCatalog();
 });
+
+onBeforeUnmount(() => {
+  rowsObject.value = [];
+  responseData.value = [];
+})
 </script>

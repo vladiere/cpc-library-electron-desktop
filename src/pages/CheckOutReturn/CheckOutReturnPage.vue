@@ -30,8 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, defineAsyncComponent } from 'vue'
-import { SpinnerIos } from 'src/utils/loading';
+import { defineComponent, ref, defineAsyncComponent } from 'vue'
 
 defineComponent({
   name: 'CheckinOutPage'
@@ -39,19 +38,23 @@ defineComponent({
 
 const CheckedOutComponent = defineAsyncComponent({
   loader: () => import('components/CheckedInOut/CheckedOutComponent.vue'),
-  loadingComponent: SpinnerIos(1300, 'Loading...'),
+  delay: 300,
+  timeout: 2300,
   suspensible: false
 });
 
 const ReturnComponent = defineAsyncComponent({
   loader: () => import('components/CheckedInOut/ReturnComponent.vue'),
-  loadingComponent: SpinnerIos(1300, 'Loading...'),
+  delay: 300,
+  timeout: 2300,
   suspensible: false
 });
 
 const HistoryReturned = defineAsyncComponent({
   loader: () => import('components/CheckedInOut/HistoryBookComponent.vue'),
-  loadingComponent: SpinnerIos(1300, 'Loading...')
+  delay: 300,
+  timeout: 2300,
+  suspensible: false
 });
 
 const tab = ref('checkedout');

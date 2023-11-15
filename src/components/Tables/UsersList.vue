@@ -1,11 +1,27 @@
 <template>
-  <q-table title="Users List" :rows="rows" :columns="columns" row-key="name" />
+  <q-table title="Users List" :rows="rows" :columns="columns" row-key="name" :filter="filter" >
+    <template v-slot:top>
+      <span class="text-h6">Users List</span>
+      <q-space />
+        <q-input
+            placeholder="Search..."
+            rounded
+            dense
+            outlined
+            v-model="filter"
+        >
+          <template v-slot:prepend>
+            <q-icon name="mdi-magnify" />
+          </template>
+        </q-input>
+    </template>
+  </q-table>
 </template>
 
 <script setup lang="ts">
 import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue';
 import { api } from 'src/boot/axios';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
 
 defineComponent({
   name: 'UsersTable',
@@ -19,7 +35,9 @@ interface UserDetails {
   email_address: string;
 }
 
-const columns: any = [
+const filter = ref('')
+
+const columns: unknown = [
   {
     name: 'fullname',
     label: 'Fullname',
@@ -64,7 +82,7 @@ const getUserDetails = async () => {
   try {
     const response = await api.post('/user/get/details', { user_id: 0 }, {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     })
     rows.value = response.data;
@@ -73,8 +91,8 @@ const getUserDetails = async () => {
   }
 }
 
-onMounted(() => {
-  getUserDetails();
+onMounted(async () => {
+  await getUserDetails();
 })
 
 onBeforeUnmount(() => {

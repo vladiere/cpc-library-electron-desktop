@@ -93,14 +93,6 @@
     <q-page-container class="bg-grey-11">
       <router-view />
     </q-page-container>
-
-    <!-- <q-footer bordered class="bg-grey-7 text-white"> -->
-    <!--   <q-toolbar> -->
-    <!--     <q-toolbar-title> -->
-    <!--       <FooterComponent /> -->
-    <!--     </q-toolbar-title> -->
-    <!--   </q-toolbar> -->
-    <!-- </q-footer> -->
   </q-layout>
 </template>
 
@@ -109,23 +101,18 @@ import { onMounted, ref, watchEffect } from 'vue';
 import EssentialLink, {
   EssentialLinkProps,
 } from 'components/EssentialLink.vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import appLogo from 'src/assets/applogo.png';
-import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
 import ListNotifications, {
   NotificationsProps,
 } from 'src/components/Notify/ListNotifications.vue';
-import FooterComponent from 'src/components/Footer/FooterComponent.vue';
 import jwt_decode from 'jwt-decode';
-import IDecodedModel from 'src/models/decodedModel';
 import { socket } from 'src/utils/socket'
 
 const route = useRoute();
-const router = useRouter();
 const routeName = ref<unknown>('');
-const librarianStore = useLibrarianDataStore();
 const loading = ref(true);
 
 const essentialLinks = ref<EssentialLinkProps>([
@@ -188,74 +175,54 @@ const essentialLinks = ref<EssentialLinkProps>([
 const leftDrawerOpen = ref(false);
 const notifications = ref<NotificationsProps>([])
 const unReadCounts = ref(0);
-const decodedToken: IDecodedModel = jwt_decode(SessionStorage.getItem('token'));
+const decodedToken = jwt_decode(LocalStorage.getItem('token'));
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 
-const getLibrarianDetails = async () => {
-  try {
-
-    const response = await api.post(
-      '/get/librarian',
-      { librarian_id: decodedToken.user_id, option: 'single' },
-      {
-        headers: {
-          Authorization: `Bearer ${
-            SessionStorage.getItem('token') as string
-          }`,
-        },
-      }
-    );
-
-    librarianStore.initLibrarian(response.data[0]);
-
-    const acquisitions = essentialLinks.value.find((item: any) => item.title === 'acquisitions')
-    acquisitions.visibility = librarianStore.privilege === 'admin';
-    const catalogue = essentialLinks.value.find((item: any) => item.title === 'catalogue')
-    catalogue.visibility = librarianStore.privilege === 'admin';
-  } catch (error: any) {
-    router.push('/');
-    throw new Error(error);
-  }
+const checkLibrarianIsAdmin = async () => {
+  const acquisitions = essentialLinks.value.find((item: unknown) => item.title === 'acquisitions')
+  acquisitions.visibility = decodedToken.privilege === 'admin';
+  const catalogue = essentialLinks.value.find((item: unknown) => item.title === 'catalogue')
+  catalogue.visibility = decodedToken.privilege === 'admin';
 };
 
 const librarianNotifications = async () => {
   try {
     const response = await api.get('/notifications/librarian', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     })
     notifications.value = response.data;
-    unReadCounts.value = notifications.value.filter((item: any) => item.status === 'unread').length;
+    unReadCounts.value = notifications.value.filter((item: unknown) => item.status === 'unread').length;
+
+    // Sort the notifications based on the "status" property
+    notifications.value.sort((a, b) => {
+      // Convert status values to lowercase for case-insensitive sorting
+      const statusA = a.status.toLowerCase();
+      const statusB = b.status.toLowerCase();
+
+      if (statusA < statusB) return 1;
+      if (statusA > statusB) return -1;
+
+      return 0;
+    });
   } catch (error) {
     throw error;
   }
 }
 
 
-// Sort the notifications based on the "status" property
-notifications.value.sort((a, b) => {
-  // Convert status values to lowercase for case-insensitive sorting
-  const statusA = a.status.toLowerCase();
-  const statusB = b.status.toLowerCase();
-
-  if (statusA < statusB) return 1;
-  if (statusA > statusB) return -1;
-
-  return 0;
-});
-
 const readAllNotifications = async () => {
   try {
     await api.get('/notifications/clear', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     });
-    notifications.value.filter((item: any) => item.status = 'read')
+    notifications.value.filter((item: unknown) => item.status = 'read')
     unReadCounts.value = 0;
   } catch (error) {
     throw error;
@@ -263,11 +230,11 @@ const readAllNotifications = async () => {
 }
 
 
-onMounted(() => {
-  getLibrarianDetails();
-  librarianNotifications();
+onMounted(async () => {
+  await checkLibrarianIsAdmin();
+  await librarianNotifications();
 
-  socket.on("new_notification", (data) => {
+  socket.on('new_notification', (data) => {
     if (data) {
       librarianNotifications();
     }

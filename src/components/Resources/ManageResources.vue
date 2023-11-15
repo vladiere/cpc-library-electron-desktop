@@ -15,18 +15,6 @@
     <template v-slot:body-cell-button="{ row, col }">
       <q-td key="button" :props="col.props">
         <q-btn
-          icon="delete"
-          size="md"
-          color="red-9"
-          flat
-          dense
-          @click="handleButtonClick('delete', row)"
-        >
-          <q-tooltip class="bg-grey-9 text-grey-1" :delay="200"
-            >remove item</q-tooltip
-          >
-        </q-btn>
-        <q-btn
           icon="edit_square"
           size="md"
           color="green-9"
@@ -59,11 +47,10 @@
 </template>
 
 <script setup lang="ts">
-import { SessionStorage, Loading } from 'quasar';
+import { LocalStorage } from 'quasar';
 import { api } from 'src/boot/axios';
 import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { SpinnerIos } from 'src/utils/loading'
 
 defineComponent({
   name: 'ManageResources',
@@ -73,7 +60,7 @@ const router = useRouter();
 const loading = ref(false);
 const filter = ref('');
 
-const columns: any = ref([
+const columns: unknown = ref([
   {
     name: 'button',
     required: true,
@@ -119,14 +106,6 @@ const columns: any = ref([
     label: 'Edition',
     align: 'center',
     field: 'edition',
-    sortable: true,
-  },
-  {
-    name: 'Volumes',
-    required: true,
-    label: 'Volumes',
-    align: 'center',
-    field: 'volumes',
     sortable: true,
   },
   {
@@ -179,20 +158,18 @@ const fetchData = async () => {
   try {
     const response = await api.get('/get/all/books', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`,
       },
     });
 
     rows.value = response.data;
-  } catch (error: any) {
-    console.error(error.message);
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
-onMounted(() => {
-  SpinnerIos(1300, 'Loading...');
-  fetchData();
+onMounted(async () => {
+  await fetchData();
 });
 
 onBeforeUnmount(() => {

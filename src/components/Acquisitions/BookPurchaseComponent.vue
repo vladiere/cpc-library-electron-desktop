@@ -118,12 +118,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 import BookPurchase, {
   BookPurchaseRecordsProps,
 } from 'src/components/Acquisitions/BookPurchase.vue';
 import { api } from 'src/boot/axios';
-import { Notify, SessionStorage } from 'quasar';
+import { Notify, LocalStorage } from 'quasar';
 import isValidDate from 'src/functions/isValidDate';
 
 defineComponent({
@@ -156,7 +156,7 @@ const handleSubmitPurchase = async () => {
       { book_acquisition: form.value },
       {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`,
         },
       }
     );
@@ -191,8 +191,8 @@ const handleSubmitPurchase = async () => {
         timeout: 2400,
       });
     }
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -200,17 +200,21 @@ const getAllBookAcquisitions = async () => {
   try {
     const response = await api.get('/get/library/acquisitions', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`,
       },
     });
 
     bookPurchaseRecords.value = response.data;
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
-onMounted(() => {
-  getAllBookAcquisitions();
+onMounted(async () => {
+  await getAllBookAcquisitions();
 });
+
+onBeforeUnmount(() => {
+  bookPurchaseRecords.value = [];
+})
 </script>

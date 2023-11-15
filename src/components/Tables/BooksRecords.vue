@@ -44,7 +44,7 @@
 import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 import IOldResources from 'src/models/oldResources';
 import { api } from 'src/boot/axios';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
 
 defineComponent({
   name: 'OldResources',
@@ -53,14 +53,14 @@ defineComponent({
 const rows = ref<IOldResources[]>([]);
 const filter = ref(null);
 
-const columns: any = [
+const columns: unknown = [
   {
     name: 'book id',
     label: 'Book ID',
     required: true,
     align: 'left',
     field: 'book_id',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -69,7 +69,7 @@ const columns: any = [
     label: 'Author Name',
     align: 'left',
     field: 'author_name',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -78,7 +78,7 @@ const columns: any = [
     label: 'Title of the Book',
     align: 'left',
     field: 'title',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -87,7 +87,7 @@ const columns: any = [
     label: 'Edition',
     align: 'left',
     field: 'edition',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -96,7 +96,7 @@ const columns: any = [
     label: 'Author Name',
     align: 'left',
     field: 'publisher_name',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -105,7 +105,7 @@ const columns: any = [
     label: 'Cost Price',
     align: 'left',
     field: 'cost_price',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -114,7 +114,7 @@ const columns: any = [
     label: 'Volumes',
     align: 'left',
     field: 'copies',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
@@ -123,7 +123,7 @@ const columns: any = [
     label: 'Available Copies',
     align: 'left',
     field: 'borrowed_copies',
-    format: (val: any) => `${val}`,
+    format: (val: unknown) => `${val}`,
     sortable: true,
   },
 ];
@@ -132,18 +132,18 @@ const fetchResources = async () => {
   try {
     const response = await api.post('/get/all/books/inventory', { limit: 0 }, {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
       },
     });
 
     rows.value = response.data;
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
-onMounted(() => {
-  fetchResources();
+onMounted(async () => {
+  await fetchResources();
 });
 
 onBeforeUnmount(() => {

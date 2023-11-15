@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios'
-import { SessionStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import { socket } from 'src/utils/socket'
 
 defineComponent({
@@ -132,7 +132,7 @@ const getAllPendingReservation = async () => {
   try {
       const response = await api.post('/transactions/all', { option: 'Reserved' }, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       })
       if (response.data) {
@@ -162,13 +162,13 @@ const handleClick = async (option: string, transaction_id: number) => {
     }
     const response = await api.post(endpoint, { transaction_id: transaction_id }, {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     });
     selected.value = [];
-    getAllPendingReservation();
 
-    socket.emit("notification", transaction_id)
+    await getAllPendingReservation();
+    await socket.emit('notification', transaction_id)
 
     Notify.create({
       message: response.data.message,
@@ -180,12 +180,12 @@ const handleClick = async (option: string, transaction_id: number) => {
   }
 };
 
-onMounted(() => {
-  getAllPendingReservation();
+onMounted(async () => {
+  await getAllPendingReservation();
 
-  socket.on("new_notification", (data) => {
+  await socket.on('new_notification', async (data) => {
     if (data) {
-      getAllPendingReservation();
+      await getAllPendingReservation();
     }
   })
 })

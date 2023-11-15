@@ -26,11 +26,11 @@
 <script setup lang="ts">
 import formatDateToHumanReadable from 'src/functions/formattedDated';
 export interface BookPurchaseRecordsProps {
-  accession_no: any;
+  accession_no: unknown;
   acquisition_date: string;
-  acquisition_id: any;
+  acquisition_id: unknown;
   book_condition: string;
-  cost: any;
+  cost: unknown;
   notes: string;
   source: string;
   title: string;

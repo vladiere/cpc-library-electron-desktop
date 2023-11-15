@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import { loginApi } from 'src/boot/axios';
-import { SessionStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import { useRouter } from 'vue-router';
 
 defineComponent({
@@ -91,11 +91,10 @@ const handleSubmit = async () => {
       }
     });
 
-    SessionStorage.set('token', response.data.user.accessToken);
-    SessionStorage.set('refresh', response.data.user.refreshToken);
-
+    LocalStorage.set('token', response.data.user.accessToken);
+    LocalStorage.set('refresh', response.data.user.refreshToken);
     router.push('/dashboard');
-  } catch (error: any) {
+  } catch (error: unknown) {
     loading.value = false;
     console.log(error.response.data);
     console.log(error);

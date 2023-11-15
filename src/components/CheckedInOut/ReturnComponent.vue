@@ -42,8 +42,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { api } from 'src/boot/axios'
-import { SessionStorage, Notify } from 'quasar'
-import { useUserStore } from 'src/stores/user-store';
+import { LocalStorage, Notify } from 'quasar'
 import { socket } from 'src/utils/socket';
 
 const filter = ref('');
@@ -118,7 +117,7 @@ const getAllCheckedOutReservation = async () => {
         transaction_status: 'Active'
       }, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       });
       if (response.data) {
@@ -133,18 +132,19 @@ const getAllCheckedOutReservation = async () => {
 const handleClick = async (transaction_id: number) => {
   console.log(transaction_id)
   try {
-    const response = await api.post("/transaction/book/check_return",
+    const response = await api.post('/transaction/book/check_return',
     {
       transaction_id: transaction_id,
       transaction_type: 'Returned',
       transaction_status: 'Completed'
     }, {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     });
-    getAllCheckedOutReservation();
-    socket.emit("notifications", transaction_id);
+
+    await getAllCheckedOutReservation();
+    await socket.emit('notifications', transaction_id);
     Notify.create({
       message: response.data.message,
       position: 'top-right',
@@ -155,8 +155,8 @@ const handleClick = async (transaction_id: number) => {
   }
 }
 
-onMounted(() => {
-  getAllCheckedOutReservation();
+onMounted( async () => {
+  await getAllCheckedOutReservation();
 });
 
 onBeforeMount(() => {

@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { api } from 'src/boot/axios';
-import { Notify, SessionStorage } from 'quasar';
+import { Notify, LocalStorage } from 'quasar';
 
 export interface BulkUploadProps {
   data: object;
@@ -153,7 +153,7 @@ const handleClick = async () => {
       { jsonRecords: dataToSend.value },
       {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`,
           'Content-Type': 'application/json',
         },
       }
@@ -175,7 +175,7 @@ const handleClick = async () => {
   }
 };
 
-onMounted(() => {
+onMounted( async() => {
   // Initialize a variable to store the previous values of columns
   const previousValues: any = {};
 

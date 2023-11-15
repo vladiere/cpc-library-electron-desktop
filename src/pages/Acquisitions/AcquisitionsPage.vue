@@ -13,6 +13,7 @@
       >
         <q-tab name="bookpurchase" label="Book Purchase" />
         <q-tab name="contributors" label="Contributors" />
+        <q-tab name="contributorsDetails" label="History" />
       </q-tabs>
       <q-separator />
 
@@ -27,15 +28,21 @@
         </q-tab-panel>
 
         <q-tab-panel name="contributors">
-          <span class="text-subtitle">Contributors</span>
           <q-virtual-scroll
-            style="max-height: 50vh"
-            :items="contributors"
+            style="max-height: calc(100vh - 100%)"
+            :items="contributorsList"
             separator
             v-slot="{ item, index }"
           >
-            <Contributors :key="index" v-bind="item" />
+            <ContributorsComponent :key="index" v-bind="item" @actionPerformed="handleActionPerformed" />
           </q-virtual-scroll>
+            <div v-if="contributorsList.length === 0" class="text-h3 text-grey-7 text-weight-light column items-center q-my-xl">
+              No Contributors as of now
+            </div>
+        </q-tab-panel>
+
+        <q-tab-panel name="contributorsDetails">
+
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
@@ -43,11 +50,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
-import BookPurchaseComponent from 'src/components/Acquisitions/BookPurchaseComponent.vue';
-import Contributors, {
-  ContributorsProps,
-} from 'src/components/Acquisitions/ContributorsComponent.vue';
+import { defineComponent, ref, defineAsyncComponent, onMounted, onBeforeUnmount } from 'vue';
+import { ContributorsProps } from 'components/Acquisitions/ContributorsComponent.vue';
+import { api } from 'src/boot/axios';
+import { LocalStorage } from 'quasar';
+import { socket } from 'src/utils/socket';
 
 defineComponent({
   name: 'AcquisitionsPage',
@@ -55,49 +62,49 @@ defineComponent({
 
 const tab = ref('bookpurchase');
 
+const BookPurchaseComponent = defineAsyncComponent({
+  loader: () => import('components/Acquisitions/BookPurchaseComponent.vue'),
+  delay: 200,
+  timeout: 2300,
+  suspensible: false
+});
+
+const ContributorsComponent = defineAsyncComponent({
+  loader: () => import('components/Acquisitions/ContributorsComponent.vue'),
+  delay: 300,
+  timeout: 2300,
+  suspensible: false
+});
 // Sample data
-const contributors: ContributorsProps[] = [
-  {
-    id: 1,
-    title: 'the seven deads',
-    date: '2023-09-10',
-    status: 'recommend this',
-    name: 'John Doe',
-  },
-  {
-    id: 2,
-    title: 'you and only you',
-    date: '2023-09-09',
-    status: 'add this',
-    name: 'Jane Smith',
-  },
-  {
-    id: 3,
-    title: 'functional programmin',
-    date: '2023-09-08',
-    status: 'recommend this',
-    name: 'Alice Johnson',
-  },
-  {
-    id: 4,
-    title: 'advance OOP',
-    date: '2023-09-07',
-    status: 'recommend this',
-    name: 'Bob Brown',
-  },
-  {
-    id: 5,
-    title: 'thinking out of the box',
-    date: '2023-09-06',
-    status: 'add this',
-    name: 'Eve White',
-  },
-  {
-    id: 6,
-    title: 'everything is encoded',
-    date: '2023-09-05',
-    status: 'recommend this',
-    name: 'Charlie Green',
-  },
-];
+const contributorsList = ref<ContributorsProps>([]);
+
+const getContributors = async () => {
+  try {
+    const response = await api.post('/contributors/get/all', { file_status: 'pending' }, {
+      headers: {
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
+      }
+    })
+    contributorsList.value = response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+const handleActionPerformed = async (data: object) => {
+  if (data) {
+    await getContributors();
+  }
+}
+
+onMounted(async () => {
+  await getContributors();
+  await socket.on('new_notification', async () => {
+    await getContributors();
+  })
+});
+
+onBeforeUnmount(() => {
+  contributorsList.value = [];
+})
 </script>

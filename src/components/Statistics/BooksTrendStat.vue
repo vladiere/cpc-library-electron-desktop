@@ -61,7 +61,7 @@ const chartOptions = {
   },
   tooltip: {
     y: {
-      formatter: function (val: any) {
+      formatter: function (val: unknown) {
         return `This book has ${val}`;
       },
     },

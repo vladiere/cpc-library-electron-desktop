@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios'
-import { SessionStorage, Notify } from 'quasar'
+import { LocalStorage, Notify } from 'quasar'
 import { socket } from 'src/utils/socket';
 
 defineComponent({
@@ -66,17 +66,7 @@ defineComponent({
 const filter = ref('');
 const selected = ref([]);
 
-interface PendingTransactions {
-  pending_transaction_id: number;
-  title: string;
-  fullname: string;
-  transaction_type: string;
-  status: string;
-  request_date: string;
-  approve_date: string;
-}
-
-const columns = [
+const columns: unknown = [
   {
     name: 'book',
     required: true,
@@ -137,7 +127,7 @@ const getAllPendingBorrowed = async () => {
   try {
       const response = await api.post('/transactions/all', { option: 'Borrowed' }, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       })
       if (response.data) {
@@ -149,9 +139,9 @@ const getAllPendingBorrowed = async () => {
   }
 };
 
-const handleClick = async (option: string, data_set: any) => {
+const handleClick = async (option: string, data_set: object) => {
   try {
-    data_set.map(async (item: any) => {
+    data_set.map(async (item: unknown) => {
       let endpoint = '';
       switch (option) {
         case 'accept':
@@ -167,13 +157,13 @@ const handleClick = async (option: string, data_set: any) => {
       }
       const response = await api.post(endpoint, { transaction_id: item.pending_transaction_id }, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       });
       selected.value = [];
-      getAllPendingBorrowed();
 
-      socket.emit("notifications", item.pending_transaction_id);
+      await getAllPendingBorrowed();
+      await socket.emit('notifications', item.pending_transaction_id);
 
       Notify.create({
         message: response.data.message,
@@ -188,12 +178,12 @@ const handleClick = async (option: string, data_set: any) => {
 
 
 
-onMounted(() => {
-  getAllPendingBorrowed();
+onMounted(async () => {
+  await getAllPendingBorrowed();
 
-  socket.on("new_notification", (data) => {
+  await socket.on('new_notification', async (data) => {
     if (data) {
-      getAllPendingBorrowed();
+      await getAllPendingBorrowed();
     }
   })
 })

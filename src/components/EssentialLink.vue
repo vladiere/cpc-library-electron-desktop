@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { useLibrarianDataStore } from 'stores/user';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter } from 'vue-router';
 
@@ -45,17 +45,17 @@ const handleClick = async (link: string) => {
   if (link === 'logout') {
     const response = await api.post(
       '/logout/librarian',
-      { refreshToken: SessionStorage.getItem('refresh') as string },
+      { refreshToken: LocalStorage.getItem('refresh') as string },
       {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token') as string}`,
+          Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
         },
       }
     );
 
     if (response.data !== '') {
       librarianStore.clearLibrarian();
-      SessionStorage.clear();
+      LocalStorage.clear();
       router.push('/');
     } else {
       console.log(response.data);

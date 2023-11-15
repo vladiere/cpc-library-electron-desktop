@@ -1,7 +1,7 @@
 import { boot } from 'quasar/wrappers';
 import axios, { AxiosInstance } from 'axios';
 import jwt_decode from 'jwt-decode';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -29,12 +29,12 @@ const loginApi = axios.create({ baseURL: 'http://localhost:3000/api/' });
 const refreshToken = async () => {
   try {
     const response = await api.post('/refresh/user/tokens', {
-      refreshToken: SessionStorage.getItem('refresh'),
+      refreshToken: LocalStorage.getItem('refresh'),
     });
 
     return response.data[0];
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
@@ -43,8 +43,8 @@ api.interceptors.request.use(
   async (config) => {
     const currentDate = new Date();
 
-    const decodedToken: any = jwt_decode(
-      SessionStorage.getItem('token') as string,
+    const decodedToken: unknown = jwt_decode(
+      LocalStorage.getItem('token'),
     );
     if (decodedToken.exp * 1000 < currentDate.getTime()) {
       const data = await refreshToken();

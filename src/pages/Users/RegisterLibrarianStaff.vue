@@ -244,7 +244,7 @@
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import { LocalStorage } from 'quasar';
 
 defineComponent({
   name: 'RegisterLibrarianStaff',
@@ -274,7 +274,6 @@ const form = ref({
 
 const options = ['tech coordinator', 'assistant', 'vendor'];
 const isPwd = ref(true);
-const $q = useQuasar();
 
 const onSucess = () => {
   Object.entries(form.value).map((item: any) => {
@@ -286,7 +285,7 @@ const handleRegisterStaff = async () => {
   try {
     const response = await api.post('/register/librarian', form.value, {
       headers: {
-        Authorization: `Bearer ${$q.sessionStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
       },
     });
 

@@ -25,16 +25,39 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import CardsComponentProps, {
-  CardsProps,
-} from 'components/Dashboard/CardsComponent.vue';
-import OnlineChart from 'src/components/Dashboard/OnlineChart.vue';
-import RecentVisitChart from 'src/components/Dashboard/RecentVisitChart.vue';
-import TrendChart from 'src/components/Dashboard/TrendChart.vue';
+import { onMounted, defineAsyncComponent, ref } from 'vue';
+import { CardsProps } from 'components/Dashboard/CardsComponent.vue';
 import { socket } from 'src/utils/socket';
 import { api } from 'src/boot/axios';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
+
+const CardsComponentProps = defineAsyncComponent({
+  loader: () => import('components/Dashboard/CardsComponent.vue'),
+  delay: 300,
+  timeout: 2300,
+  suspensible: false
+})
+
+const OnlineChart = defineAsyncComponent({
+  loader: () => import('components/Dashboard/OnlineChart.vue'),
+  delay: 350,
+  timeout: 2300,
+  suspensible: false
+});
+
+const RecentVisitChart = defineAsyncComponent({
+  loader: () => import('components/Dashboard/RecentVisitChart.vue'),
+  delay: 400,
+  timeout: 2300,
+  suspensible: false
+});
+
+const TrendChart = defineAsyncComponent({
+  loader: () => import('components/Dashboard/TrendChart.vue'),
+  delay: 450,
+  timeout: 2300,
+  suspensible: false
+});
 
 const totalActive = ref(0);
 const totalVisit = ref(0);
@@ -64,9 +87,9 @@ const cardsComponent = ref<CardsProps[]>([
 
 const getUserActive = async () => {
   try {
-    const response = await api.get("/user/active", {
+    const response = await api.get('/user/active', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     })
     totalActive.value = response.data.total_active;
@@ -82,10 +105,10 @@ const getUserActive = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
 
-  getUserActive();
-  socket.on("new_connected", (data) => {
+  await getUserActive();
+  await socket.on('new_connected', (data) => {
     if (data) {
       totalActive.value += 1;
       const onlineUsersCard = cardsComponent.value.find(card => card.title === 'online users');
@@ -93,13 +116,13 @@ onMounted(() => {
     }
   })
 
-  socket.on("user_logout", () => {
+  await socket.on('user_logout', () => {
     totalActive.value -= 1;
     const onlineUsersCard = cardsComponent.value.find(card => card.title === 'online users');
     onlineUsersCard.count = totalActive.value;
   })
 
-  socket.on("disconnected", () => {
+  await socket.on('disconnected', () => {
     if (totalActive.value !== 0) {
       totalActive.value -= 1;
     }
@@ -107,11 +130,11 @@ onMounted(() => {
     onlineUsersCard.count = totalActive.value;
   })
 
-  socket.on("new_visitor", () => {
+  await socket.on('new_visitor', () => {
     const recentVisitCard = cardsComponent.value.find(card => card.title === 'recent visits');
     totalVisit.value += 1;
     recentVisitCard.count = totalVisit.value;
-    console.log("new visitor");
+    console.log('new visitor');
   })
 
 })

@@ -150,7 +150,7 @@
 </template>
 
 <script setup lang="ts">
-import { Notify, SessionStorage } from 'quasar';
+import { Notify, LocalStorage } from 'quasar';
 import { api } from 'src/boot/axios';
 import isValidDate from 'src/functions/isValidDate';
 import { defineComponent, ref } from 'vue';
@@ -159,7 +159,7 @@ defineComponent({
   name: 'AddResources',
 });
 
-const forImage = ref();
+const forImage = ref(null);
 const form = ref({
   accession_no: null,
   image: '',
@@ -175,19 +175,25 @@ const form = ref({
 
 const handleAddRecord = async () => {
   try {
-    const response = await api.post(
-      'add/book/record',
-      {
-        records: form.value,
-      },
-      {
+    const formData = new FormData();
+    formData.append('file_img', forImage.value);
+    formData.append('accession_no', form.value.accession_no);
+    formData.append('date_received', form.value.date_received);
+    formData.append('author', form.value.author);
+    formData.append('title_of_the_book', form.value.title_of_the_book);
+    formData.append('edition', form.value.edition);
+    formData.append('cost_price', form.value.cost_price);
+    formData.append('publisher', form.value.publisher);
+    formData.append('copyright_yr', form.value.copyright_yr);
+    formData.append('remarks', form.value.remarks);
+
+    const response = await api.post( 'add/book/record', formData, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data',
         },
       }
     );
-    console.log(response.data);
 
     if (response.data.status_code === 409) {
       Notify.create({
@@ -203,8 +209,8 @@ const handleAddRecord = async () => {
         position: 'center',
       });
     }
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 </script>

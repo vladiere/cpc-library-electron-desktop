@@ -30,22 +30,22 @@
                   text-color="white"
                 >
                   <span class="text-h2 text-bold">{{
-                    form.firstname.split('')[0].toUpperCase()
+                    librarianDetails.firstname ? librarianDetails.firstname.split('')[0].toUpperCase() : ''
                   }}</span>
                 </q-avatar>
               </q-item-section>
 
               <div class="col-2 text-h6 q-mt-xl text-capitalize">
-                {{ form.firstname }} {{ form.middlename }} {{ form.lastname }}
+                {{ librarianDetails.firstname }} {{ librarianDetails.middlename }} {{ librarianDetails.lastname }}
               </div>
-              <div class="col-2 text-grey-8 q-pt-md">@{{ form.privilege }}</div>
+              <div class="col-2 text-grey-8 q-pt-md">@{{ librarianDetails.privilege }}</div>
             </q-card-section>
 
             <q-card-section class="q-pt-none flex flex-center">
               <div
-                class="text-subtitle1 text-grey-8 text-center text-capitalize"
+                class="text-subtitle1 text-grey-8 text-center "
               >
-                {{ form.description || 'To be editted' }}
+                {{ stringFormatter(librarianDetails.description) || 'To be editted' }}
               </div>
             </q-card-section>
           </q-card>
@@ -64,8 +64,8 @@
               <q-input
                 filled
                 v-model="form.privilege"
-                label="Position"
                 disable
+                :placeholder="librarianDetails.privilege"
               />
             </div>
             <div class="col column">
@@ -74,7 +74,7 @@
                 filled
                 disable
                 v-model="form.username"
-                label="Username"
+                :placeholder="librarianDetails.username"
               />
             </div>
             <div class="col column">
@@ -82,7 +82,7 @@
               <q-input
                 filled
                 v-model="form.email_address"
-                label="Email Address"
+                :placeholder="librarianDetails.email_address"
               />
             </div>
           </div>
@@ -93,7 +93,7 @@
                 filled
                 disable
                 v-model="form.firstname"
-                label="Firstname"
+                :placeholder="stringFormatter(librarianDetails.firstname)"
               />
             </div>
             <div class="col column">
@@ -102,7 +102,7 @@
                 filled
                 disable
                 v-model="form.middlename"
-                label="Middlename"
+                :placeholder="stringFormatter(librarianDetails.middlename)"
               />
             </div>
             <div class="col column">
@@ -111,7 +111,7 @@
                 filled
                 disable
                 v-model="form.lastname"
-                label="Lastname"
+                :placeholder="stringFormatter(librarianDetails.lastname)"
               />
             </div>
           </div>
@@ -123,7 +123,7 @@
                 filled
                 v-model="form.street_address"
                 square
-                label="Street Address"
+                :placeholder="stringFormatter(librarianDetails.street_address)"
               />
             </div>
 
@@ -133,7 +133,7 @@
                 filled
                 v-model="form.address_type"
                 square
-                label="Address Type"
+                :placeholder="stringFormatter(librarianDetails.address_type)"
               />
             </div>
           </div>
@@ -144,12 +144,12 @@
               <q-input
                 filled
                 v-model="form.state_province_region"
-                label="State/Province/Region"
+                :placeholder="stringFormatter(librarianDetails.state_province_region)"
               />
             </div>
             <div class="col column">
               <span class="text-grey-7">City</span>
-              <q-input filled v-model="form.city" label="City" />
+              <q-input filled v-model="form.city" :placeholder="stringFormatter(librarianDetails.city)" />
             </div>
           </div>
 
@@ -159,8 +159,8 @@
               <q-input
                 filled
                 v-model="form.postal_code"
-                label="Postal Code"
                 type="number"
+                :placeholder="librarianDetails.postal_code || ''"
               />
             </div>
             <div class="col column">
@@ -168,8 +168,8 @@
               <q-input
                 filled
                 v-model="form.phone_number"
-                label="Phone/Cellphone Number"
                 @input="formatPhoneNumber"
+                :placeholder="librarianDetails.phone_number || ''"
               />
             </div>
           </div>
@@ -178,8 +178,8 @@
             <q-input
               filled
               v-model="form.description"
+              :placeholder="stringFormatter(librarianDetails.description)"
               autogrow
-              label="About Me"
             />
           </div>
           <div class="column">
@@ -187,8 +187,8 @@
             <q-input
               filled
               v-model="form.hobbies"
+              :placeholder="stringFormatter(librarianDetails.hobbies)"
               autogrow
-              label="My Hobbies"
             />
           </div>
           <div class="row self-center">
@@ -207,7 +207,7 @@
         <div class="col column q-mx-md">
           <span class="self-center text-h4 q-my-md">Library Staff</span>
           <q-btn
-            v-if="librarianStore.privilege === 'admin'"
+            v-if="librarianDetails.privilege === 'admin'"
             color="primary"
             label="Register Staff"
             rounded
@@ -235,13 +235,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, onBeforeUnmount, defineAsyncComponent } from 'vue';
+import { defineComponent, onMounted, ref, onBeforeUnmount, onBeforeMount, defineAsyncComponent } from 'vue';
 import { StaffProps } from 'components/UserProfile/StaffComponent.vue';
-import { useLibrarianDataStore } from 'src/stores/user';
 import { api } from 'src/boot/axios';
 import jwt_decode from 'jwt-decode';
-import { SessionStorage, Notify } from 'quasar';
-import IDecodedModel from 'src/models/decodedModel';
+import { LocalStorage, Notify, format } from 'quasar';
+import { SpinnerFacebook } from 'src/utils/loading';
 
 defineComponent({
   name: 'UserProfile',
@@ -251,25 +250,28 @@ const StaffComponent = defineAsyncComponent(() =>
   import('components/UserProfile/StaffComponent.vue')
 );
 
-const librarianStore = useLibrarianDataStore();
-
+const { capitalize } = format;
+const librarianDetails = ref([]);
+const decoded = jwt_decode(LocalStorage.getItem('token'));
 const form = ref({
-  librarian_id: librarianStore.librarian_id,
-  firstname: librarianStore.firstname,
-  middlename: librarianStore.middlename,
-  lastname: librarianStore.lastname,
-  email_address: librarianStore.email_address,
-  phone_number: librarianStore.phone_number,
-  hobbies: librarianStore.hobbies,
-  description: librarianStore.description,
-  street_address: librarianStore.street_address,
-  city: librarianStore.city,
-  state_province_region: librarianStore.state_province_region,
-  postal_code: librarianStore.postal_code,
-  address_type: librarianStore.address_type,
-  username: librarianStore.username,
-  privilege: librarianStore.privilege,
+  librarian_id: decoded.user_id,
+  firstname: '',
+  middlename: '',
+  lastname: '',
+  email_address: '',
+  phone_number: '',
+  hobbies: '',
+  description: '',
+  street_address: '',
+  city: '',
+  state_province_region: '',
+  postal_code: '',
+  address_type: '',
+  username: '',
+  privilege: '',
 });
+
+const stringFormatter = (wordstring: string) => wordstring ? capitalize(wordstring) : '';
 
 const formatPhoneNumber = () => {
   // Remove all non-numeric characters from the input
@@ -298,55 +300,81 @@ const contacts = ref<StaffProps[]>([]);
 
 const handleSubmitUpdate = async () => {
   try {
-    const response = await api.post(
-      '/update/librarian/info',
-      { librarian_info: form.value },
-      {
+    const newForm = {
+      librarian_id: decoded.user_id,
+      firstname: form.value.firstname || librarianDetails.value.firstname,
+      middlename: form.value.middlename || librarianDetails.value.middlename,
+      lastname: form.value.lastname || librarianDetails.value.lastname,
+      email_address: form.value.email_address || librarianDetails.value.email_address,
+      phone_number: form.value.phone_number || librarianDetails.value.phone_number,
+      hobbies: form.value.hobbies || librarianDetails.value.hobbies,
+      description: form.value.description || librarianDetails.value.description,
+      street_address: form.value.street_address || librarianDetails.value.street_address,
+      city: form.value.city || librarianDetails.value.city,
+      state_province_region: form.value.state_province_region || librarianDetails.value.state_province_region,
+      postal_code: form.value.postal_code || librarianDetails.value.postal_code,
+      address_type: form.value.address_type || librarianDetails.value.address_type,
+      username: form.value.username || librarianDetails.value.username,
+      privilege: form.value.privilege || librarianDetails.value.privilege,
+    }
+
+    const response = await api.post( '/update/librarian/info', { librarian_info: newForm }, {
         headers: {
-          Authorization: `Bearer ${
-            SessionStorage.getItem('token')
-          }`,
+          Authorization: `Bearer ${ LocalStorage.getItem('token') }`,
         },
       }
     );
 
-    librarianStore.initLibrarian(response.data);
+    librarianDetails.value = response.data;
     Notify.create({
       message: response.data.message,
       type: 'positive',
       position: 'top',
       timeout: 2500,
     });
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 
 const getLibrarianStaffs = async () => {
   try {
-    const decodedToken: IDecodedModel = jwt_decode(
-      SessionStorage.getItem('token')
-    );
-    const response = await api.post(
-      '/get/librarian',
-      { librarian_id: decodedToken.user_id, option: '' },
+
+    const response = await api.post( '/get/librarian', { librarian_id: decoded.user_id, option: '' },
       {
         headers: {
-          Authorization: `Bearer ${
-            SessionStorage.getItem('token')
-          }`,
+          Authorization: `Bearer ${ LocalStorage.getItem('token') as string }`,
         },
       }
     );
 
-    contacts.value = response.data;
-  } catch (error: any) {
-    throw new Error(error);
+    contacts.value = response.data[0];
+  } catch (error) {
+    throw error;
   }
 };
 
-onMounted(() => {
-  getLibrarianStaffs();
+const getLibrarianDetails = async () => {
+  try {
+      const response = await api.post('/get/librarian', { librarian_id: decoded.user_id, option: 'single' }, {
+        headers: {
+          Authorization: `Bearer ${LocalStorage.getItem('token') as string}`
+        }
+      })
+      librarianDetails.value = response.data[0];
+      SpinnerFacebook(false);
+  } catch (error) {
+    throw error;
+  }
+}
+
+onBeforeMount(() => {
+  SpinnerFacebook(true, 'Loading...');
+  getLibrarianDetails();
+})
+
+onMounted(async () => {
+  await getLibrarianStaffs();
 });
 
 onBeforeUnmount(() => {contacts.value = []})

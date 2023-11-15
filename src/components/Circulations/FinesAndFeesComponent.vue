@@ -38,9 +38,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, onBeforeUnmount, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { api } from 'src/boot/axios';
-import { SessionStorage } from 'quasar';
+import { LocalStorage } from 'quasar';
 
 defineComponent({
   name: 'FinesAndFees',
@@ -48,7 +48,6 @@ defineComponent({
 
 const filter = ref('');
 const selected = ref([]);
-const actionLabel = ref('All');
 
 const columns = [
   {
@@ -109,16 +108,11 @@ const handleClick = (items: object) => {
   console.log(items);
 };
 
-const onItemClick = (action: string) => {
-  actionLabel.value = action;
-  filter.value = action === 'all' ? '' : action;
-};
-
 const getAllFinesFeesSummary = async () => {
   try {
-    const response = await api.get("/transaction/fines_fees/summary", {
+    const response = await api.get('/transaction/fines_fees/summary', {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     });
     if (response.data) {
@@ -130,7 +124,7 @@ const getAllFinesFeesSummary = async () => {
   }
 }
 
-onMounted(() => {
-  getAllFinesFeesSummary();
+onMounted( async () => {
+  await getAllFinesFeesSummary();
 });
 </script>

@@ -33,9 +33,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { api } from 'src/boot/axios'
-import { SessionStorage, Notify } from 'quasar'
-import { useUserStore } from 'src/stores/user-store';
-import { socket } from 'src/utils/socket';
+import { LocalStorage } from 'quasar'
 
 const filter = ref('');
 
@@ -89,7 +87,7 @@ const getAllCheckedOutReservation = async () => {
         transaction_status: 'all'
       }, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       });
       if (response.data) {
@@ -101,8 +99,8 @@ const getAllCheckedOutReservation = async () => {
   }
 }
 
-onMounted(() => {
-  getAllCheckedOutReservation();
+onMounted( async () => {
+  await getAllCheckedOutReservation();
 });
 
 onBeforeMount(() => {

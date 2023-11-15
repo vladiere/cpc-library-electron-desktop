@@ -142,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import { SessionStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
@@ -169,7 +169,7 @@ const handleChangeRecord = async () => {
       {
         headers: {
           Authorization: `Bearer ${
-            SessionStorage.getItem('token') as string
+            LocalStorage.getItem('token') as string
           }`, // Include the token in the request headers
         },
       }
@@ -205,7 +205,7 @@ const handleUploadImage = async () => {
         {
           headers: {
             Authorization: `Bearer ${
-              SessionStorage.getItem('token')
+              LocalStorage.getItem('token')
             }`,
             'Content-Type': 'multipart/form-data',
           },
@@ -234,8 +234,8 @@ const handleUploadImage = async () => {
   }
 };
 
-onMounted(() => {
-  book_record.value = JSON.parse(route.query.dataJSON as string);
+onMounted( async () => {
+  book_record.value = await JSON.parse(route.query.dataJSON as string);
 
   if (
     book_record.value.img_path === '' ||
@@ -248,6 +248,5 @@ onMounted(() => {
     defaultImage.value = imgUrl + book_record.value.img_path;
   }
 
-  console.log(defaultImage.value);
 });
 </script>

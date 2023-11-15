@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-const columns: any = [
+const columns: unknown = [
   {
     name: 'accession_no',
     label: 'Accession No.',
@@ -69,7 +69,7 @@ const columns: any = [
 const filter = ref('');
 
 export interface BookSubjectProps {
-  rowsObject: object | any;
+  rowsObject: object | unknown;
 }
 
 withDefaults(defineProps<BookSubjectProps>(), {

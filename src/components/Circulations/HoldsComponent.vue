@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios'
-import { SessionStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import { socket } from 'src/utils/socket'
 
 
@@ -133,7 +133,7 @@ const getAllPendingHolds = async () => {
   try {
       const response = await api.post('/transactions/all', { option: 'Held' }, {
         headers: {
-          Authorization: `Bearer ${SessionStorage.getItem('token')}`
+          Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       })
       if (response.data) {
@@ -162,13 +162,15 @@ const handleClick = async (option: string, transaction_id: number) => {
     }
     const response = await api.post(endpoint, { transaction_id: transaction_id }, {
       headers: {
-        Authorization: `Bearer ${SessionStorage.getItem('token')}`
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     });
     rows.value = [];
     selected.value = [];
-    getAllPendingHolds();
-    socket.emit("notification", transaction_id)
+
+    await getAllPendingHolds();
+    await socket.emit('notification', transaction_id)
+
     Notify.create({
       message: response.data.message,
       timeout: 1500,
@@ -179,12 +181,12 @@ const handleClick = async (option: string, transaction_id: number) => {
   }
 };
 
-onMounted(() => {
-  getAllPendingHolds();
+onMounted( async () => {
+  await getAllPendingHolds();
 
-  socket.on("new_notification", (data) => {
+  await socket.on('new_notification', async (data) => {
     if (data) {
-      getAllPendingHolds();
+      await getAllPendingHolds();
     }
   })
 })

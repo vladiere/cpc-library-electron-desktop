@@ -46,7 +46,6 @@ import Holds from 'src/components/Circulations/HoldsComponent.vue';
 import FinesAndFees from 'src/components/Circulations/FinesAndFeesComponent.vue';
 import Borrow from 'src/components/Circulations/BorrowComponent.vue';
 import Renewal from 'src/components/Circulations/RenewalComponent.vue';
-import { SpinnerIos } from 'src/utils/loading';
 
 defineComponent({
   name: 'CirculationsPage',
@@ -54,7 +53,6 @@ defineComponent({
 
 const Reservations = defineAsyncComponent({
   loader: () => import('components/Circulations/ReservationComponent.vue'),
-  loadingComponent: SpinnerIos(1100, 'Loading...'),
   delay: 200,
   timeout: 2000,
   suspensible: false

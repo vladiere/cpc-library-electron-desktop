@@ -3,7 +3,7 @@
     <!-- content -->
     <q-tabs v-model="tab" align="justify" narrow-indicator>
       <q-tab class="text-grey-8" name="add" label="Add Resources" />
-      <q-tab class="text-grey-8" name="manage" label="Manage Resources" v-if="librarianStore.privilege === 'admin'" />
+      <q-tab class="text-grey-8" name="manage" label="Manage Resources" v-if="decoded.privilege === 'admin'" />
     </q-tabs>
     <div class="q-gutter-y-sm">
       <q-tab-panels
@@ -27,7 +27,8 @@
 
 <script setup lang="ts">
 import { defineComponent, ref, defineAsyncComponent } from 'vue';
-import { useLibrarianDataStore } from 'src/stores/user';
+import jwt_decode from 'jwt-decode';
+import { LocalStorage } from 'quasar';
 
 defineComponent({
   name: 'ResourcesPage',
@@ -41,6 +42,6 @@ const AddResources = defineAsyncComponent(() =>
 );
 
 const tab = ref('add');
-const librarianStore = useLibrarianDataStore();
+const decoded = jwt_decode(LocalStorage.getItem('token'))
 
 </script>

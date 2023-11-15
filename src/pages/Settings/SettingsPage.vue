@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { Notify, SessionStorage } from 'quasar';
+import { Notify, LocalStorage } from 'quasar';
 import { api } from 'src/boot/axios';
 import { defineComponent, ref } from 'vue';
 import jwt_decode from 'jwt-decode';
@@ -104,8 +104,8 @@ const onSuccess = () => {
 const handleChangePassSubmit = async () => {
   try {
     if (form.value.newPass === form.value.confirmPass) {
-      const decoded: any = jwt_decode(
-        SessionStorage.getItem('token') as string
+      const decoded: unknown = jwt_decode(
+        LocalStorage.getItem('token') as string
       );
 
       const newFormData = {
@@ -117,7 +117,7 @@ const handleChangePassSubmit = async () => {
         { librarian_data: newFormData },
         {
           headers: {
-            Authorization: `Bearer ${SessionStorage.getItem('token')}`,
+            Authorization: `Bearer ${LocalStorage.getItem('token')}`,
           },
         }
       );
@@ -147,8 +147,8 @@ const handleChangePassSubmit = async () => {
         timeout: 2400,
       });
     }
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 </script>

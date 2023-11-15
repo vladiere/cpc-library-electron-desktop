@@ -15,7 +15,7 @@
         max-file-size="200000"
         max-total-size="200000"
         style="max-width: 300px"
-        :headers="[{ name: 'Authorization', value: `Bearer ${(SessionStorage.getItem('token') as string)}` }]"
+        :headers="[{ name: 'Authorization', value: `Bearer ${(LocalStorage.getItem('token') as string)}` }]"
         @rejected="onFileRejected"
         @uploaded="onFileUpload"
       />
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { SessionStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import { defineComponent, ref } from 'vue';
 import BulkUploadComponent from 'src/components/Resources/BulkUploadComponent.vue';
 
