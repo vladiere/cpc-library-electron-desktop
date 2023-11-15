@@ -1,3 +1,4 @@
+
 import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -66,3 +67,4 @@ app.on('activate', () => {
     createWindow();
   }
 });
+

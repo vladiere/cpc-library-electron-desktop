@@ -343,12 +343,11 @@ const getLibrarianStaffs = async () => {
     const response = await api.post( '/get/librarian', { librarian_id: decoded.user_id, option: '' },
       {
         headers: {
-          Authorization: `Bearer ${ LocalStorage.getItem('token') as string }`,
+          Authorization: `Bearer ${ LocalStorage.getItem('token') }`,
         },
       }
     );
-
-    contacts.value = response.data[0];
+    contacts.value = response.data;
   } catch (error) {
     throw error;
   }

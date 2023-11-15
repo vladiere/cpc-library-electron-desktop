@@ -234,9 +234,9 @@ onMounted(async () => {
   await checkLibrarianIsAdmin();
   await librarianNotifications();
 
-  socket.on('new_notification', (data) => {
+  await socket.on('new_notification', async (data) => {
     if (data) {
-      librarianNotifications();
+      await librarianNotifications();
     }
   })
   routeName.value = route.name;

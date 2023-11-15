@@ -235,6 +235,7 @@
           class="self-center"
           rounded
           type="submit"
+          :disabled="isDisabled"
         />
       </div>
     </q-form>
@@ -244,7 +245,7 @@
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 
 defineComponent({
   name: 'RegisterLibrarianStaff',
@@ -274,9 +275,10 @@ const form = ref({
 
 const options = ['tech coordinator', 'assistant', 'vendor'];
 const isPwd = ref(true);
+const isDisabled = ref(false)
 
 const onSucess = () => {
-  Object.entries(form.value).map((item: any) => {
+  Object.entries(form.value).map((item: unknown) => {
     item.value = '';
   });
 };
@@ -285,30 +287,28 @@ const handleRegisterStaff = async () => {
   try {
     const response = await api.post('/register/librarian', form.value, {
       headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`,
       },
     });
-
-    console.log(response.data);
-
-    if (response.data[0][0].statusCode === 404) {
-      $q.notify({
+    if (response.data[0].status === 404) {
+      Notify.create({
         message: response.data[0].message,
         type: 'negative',
         position: 'top',
         timeout: 2500,
       });
     } else {
-      $q.notify({
-        message: response.data[0][0].message,
+      Notify.create({
+        message: response.data[0].message,
         type: 'positive',
         position: 'top',
         timeout: 2500,
       });
+      isDisabled.value = true
       onSucess();
     }
-  } catch (error: any) {
-    throw new Error(error);
+  } catch (error) {
+    throw error;
   }
 };
 </script>

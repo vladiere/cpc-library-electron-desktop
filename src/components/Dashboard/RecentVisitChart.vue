@@ -27,7 +27,7 @@ const chartOptions = {
     type: 'pie',
   },
   title: {
-    text: 'Recent visits',
+    text: 'Most Department visits',
     align: 'left',
   },
   labels: ['BSIT', 'BSHM', 'BSED', 'BEED'],

@@ -1,5 +1,5 @@
 <template>
-  <q-table title="Users List" :rows="rows" :columns="columns" row-key="name" :filter="filter" >
+  <q-table title="Users List" class="text-capitalize" :rows="rows" :columns="columns" row-key="name" :filter="filter" >
     <template v-slot:top>
       <span class="text-h6">Users List</span>
       <q-space />

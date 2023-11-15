@@ -14,7 +14,7 @@
     }"
   >
     <template v-slot:top>
-      <span class="text-h6">Books Records</span>
+      <span class="text-h6">eBooks Records</span>
       <q-space />
       <q-input
         outlined
@@ -42,43 +42,56 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
-import IOldResources from 'src/models/oldResources';
 import { api } from 'src/boot/axios';
 import { LocalStorage } from 'quasar';
 
+
 defineComponent({
-  name: 'OldResources',
+  name: 'EbooksRecords'
 });
 
-const rows = ref<IOldResources[]>([]);
+const rows = ref([])
 const filter = ref(null);
+
+//  {
+//      "contribution_id": 29,
+//      "user_id": 1,
+//      "author_fullname": "tessa sloan",
+//      "category_name": "roman",
+//      "publisher_name": "mybooks",
+//      "file_title": "billionair boss protector",
+//      "file_path": "billionaire-boss-protector-1700010849089.epub",
+//      "fullname": "lance phillip descartin ",
+//      "department": "bsit",
+//      "file_description": "",
+//      "uploaded_date": "November 15, 2023",
+//      "file_total_downloads": 0,
+//      "file_status": "accepted"
+//  }
 
 const columns: unknown = [
   {
-    name: 'author name',
+    name: 'author fullname',
     required: true,
     label: 'Author Name',
     align: 'left',
-    field: 'author_name',
-    format: (val: unknown) => `${val}`,
+    field: 'author_fullname',
     sortable: true,
   },
   {
-    name: 'title',
+    name: 'file_title',
     required: true,
-    label: 'Title of the Book',
+    label: 'eBook Title',
     align: 'left',
-    field: 'title',
-    format: (val: unknown) => `${val}`,
+    field: 'file_title',
     sortable: true,
   },
   {
-    name: 'edition',
+    name: 'category_name',
     required: true,
-    label: 'Edition',
+    label: 'Category',
     align: 'left',
-    field: 'edition',
-    format: (val: unknown) => `${val}`,
+    field: 'category_name',
     sortable: true,
   },
   {
@@ -87,54 +100,50 @@ const columns: unknown = [
     label: 'Publisher Name',
     align: 'left',
     field: 'publisher_name',
-    format: (val: unknown) => `${val}`,
     sortable: true,
   },
   {
-    name: 'cost price',
+    name: 'fullname',
     required: true,
-    label: 'Cost Price',
+    label: 'Contributor Name',
     align: 'left',
-    field: 'cost_price',
-    format: (val: unknown) => `${val}`,
+    field: 'fullname',
     sortable: true,
   },
   {
-    name: 'copies',
+    name: 'department',
     required: true,
-    label: 'Volumes',
+    label: 'Department',
     align: 'left',
-    field: 'copies',
-    format: (val: unknown) => `${val}`,
+    field: 'department',
     sortable: true,
   },
   {
-    name: 'borrowed_copies',
+    name: 'file_total_downloads',
     required: true,
-    label: 'Available Copies',
+    label: 'Total Downloads',
     align: 'left',
-    field: 'borrowed_copies',
-    format: (val: unknown) => `${val}`,
+    field: 'file_total_downloads',
     sortable: true,
   },
 ];
 
-const fetchResources = async () => {
-  try {
-    const response = await api.post('/get/all/books/inventory', { limit: 0 }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
-      },
-    });
 
+const getUserContributions = async () => {
+  try {
+    const response = await api.post('/user/book/contribute/list', { user_id: 0, limit: 0 }, {
+      headers: {
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
+      }
+    });
     rows.value = response.data;
   } catch (error) {
     throw error;
   }
-};
+}
 
 onMounted(async () => {
-  await fetchResources();
+  await getUserContributions();
 });
 
 onBeforeUnmount(() => {
