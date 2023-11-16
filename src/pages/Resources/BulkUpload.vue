@@ -56,7 +56,7 @@ const onFileRejected = (rejectedEntries: RejectedEntry[]) => {
   });
 };
 
-const onFileUpload = (data: any) => {
+const onFileUpload = (data: unknown) => {
   const { xhr } = data;
 
   if (xhr.status === 200) {

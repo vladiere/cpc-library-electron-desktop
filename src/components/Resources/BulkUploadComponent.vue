@@ -56,12 +56,12 @@ export interface BulkUploadProps {
 
 const dataProps = defineProps<BulkUploadProps>();
 const filter = ref('');
-const dataToSend = ref<any[]>([]);
+const dataToSend = ref<unknown[]>([]);
 const onSuccess = ref(false);
 const loading = ref(false);
 const rows = ref<string[][]>([]);
 
-const columns: any = ref([
+const columns: unknown = ref([
   {
     name: 'Accession No.',
     required: true,
@@ -170,22 +170,22 @@ const handleClick = async () => {
 
     onSuccess.value = true;
     loading.value = false;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(error.message);
   }
 };
 
 onMounted( async() => {
   // Initialize a variable to store the previous values of columns
-  const previousValues: any = {};
+  const previousValues: unknown = {};
 
-  const sortedData: any[] = [];
+  const sortedData: unknown[] = [];
 
   if (Array.isArray(dataProps.data)) {
-    rows.value = dataProps.data.map((item: any) => {
-      const row: any = {};
+    rows.value = dataProps.data.map((item: unknown) => {
+      const row: unknown = {};
 
-      columns.value.forEach((col: any, index: any) => {
+      columns.value.forEach((col: unknown) => {
         if (
           item.hasOwnProperty(col.field) &&
           item[col.field] !== null &&
