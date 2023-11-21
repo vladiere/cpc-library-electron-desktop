@@ -27,23 +27,6 @@
         <div class="row q-gutter-x-md">
           <q-input
             class="col"
-            readonly
-            outlined
-            v-model="book_record.accession_no"
-            label="Accession No"
-          />
-
-          <q-input
-            class="col"
-            outlined
-            v-model="book_record.date_received"
-            readonly
-            label="Date Received"
-          />
-        </div>
-        <div class="row q-gutter-x-md">
-          <q-input
-            class="col"
             outlined
             v-model="book_record.cost_price"
             label="Cost Value"

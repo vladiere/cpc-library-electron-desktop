@@ -47,18 +47,29 @@
 </template>
 
 <script setup lang="ts">
-import { LocalStorage } from 'quasar';
-import { api } from 'src/boot/axios';
-import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useBookStore } from 'stores/book-store';
+import books from 'src/utils/books';
 
 defineComponent({
   name: 'ManageResources',
 });
 
 const router = useRouter();
-const loading = ref(false);
 const filter = ref('');
+
+// book_id
+// author_name
+// title
+// edition
+// publisher_name
+// cost_price
+// copies
+// borrowed_copies
+// book_status
+// img_path
+// total_checkedout
 
 const columns: unknown = ref([
   {
@@ -69,19 +80,11 @@ const columns: unknown = ref([
     field: 'button',
   },
   {
-    name: 'Accession No.',
+    name: 'Title of the Book',
     required: true,
-    label: 'Accession No.',
-    align: 'center',
-    field: 'accession_no',
-    sortable: true,
-  },
-  {
-    name: 'Date Received',
-    required: true,
-    label: 'Date Received',
+    label: 'Title of the Book',
     align: 'left',
-    field: 'date_received',
+    field: 'title',
     sortable: true,
   },
   {
@@ -89,15 +92,7 @@ const columns: unknown = ref([
     required: true,
     label: 'Author',
     align: 'left',
-    field: 'author',
-    sortable: true,
-  },
-  {
-    name: 'Title of the Book',
-    required: true,
-    label: 'Title of the Book',
-    align: 'left',
-    field: 'title',
+    field: 'author_name',
     sortable: true,
   },
   {
@@ -109,14 +104,6 @@ const columns: unknown = ref([
     sortable: true,
   },
   {
-    name: 'Cost Price',
-    required: true,
-    label: 'Cost Price',
-    align: 'center',
-    field: 'cost_price',
-    sortable: true,
-  },
-  {
     name: 'Publisher',
     required: true,
     label: 'Publisher',
@@ -125,24 +112,17 @@ const columns: unknown = ref([
     sortable: true,
   },
   {
-    name: 'Copyright Yr.',
+    name: 'Cost Price',
     required: true,
-    label: 'Copyright Yr.',
+    label: 'Cost Price',
     align: 'center',
-    field: 'copyright_yr',
-    sortable: true,
-  },
-  {
-    name: 'Remarks',
-    required: true,
-    label: 'Remarks',
-    align: 'left',
-    field: 'remarks',
+    field: 'cost_price',
     sortable: true,
   },
 ]);
 
 const rows = ref([]);
+const bookStore = useBookStore();
 
 const handleButtonClick = (act: string, row: object) => {
   if (act === 'edit') {
@@ -153,26 +133,9 @@ const handleButtonClick = (act: string, row: object) => {
   }
 };
 
-const fetchData = async () => {
-  loading.value = true;
-  try {
-    const response = await api.get('/get/all/books', {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`,
-      },
-    });
-
-    rows.value = response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 onMounted(async () => {
-  await fetchData();
+  await books.getAllContributorsBooks();
+  rows.value = await bookStore.getBooks;
 });
 
-onBeforeUnmount(() => {
-  rows.value = [];
-})
 </script>

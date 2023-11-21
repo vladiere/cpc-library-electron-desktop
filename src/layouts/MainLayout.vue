@@ -73,14 +73,25 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
+      :mini="miniState"
+      :width="250"
+      :breakpoint="500"
       class="bg-primary text-grey-5 text-uppercase"
     >
-      <q-list>
-        <q-item-label header class="text-grey-1 text-h6">
-          <q-img fit="contain" :src="appLogo" width="15%" />
-          CPC Library
-          <q-separator size="1px" class="q-mt-sm" dark />
-        </q-item-label>
+      <q-list padding>
+        <q-item v-ripple>
+          <q-item-section header avatar>
+            <q-img fit="contain" :src="appLogo" width="35px" style="border-radius: 50%" />
+          </q-item-section>
+
+          <q-item-section class="text-grey-1 text-h6">
+            CPC Library
+          </q-item-section>
+
+          <q-tooltip class="bg-grey-10 text-grey-2" :delay="300" anchor="bottom right" self="top middle">CPC Library</q-tooltip>
+        </q-item>
+
+        <q-separator size="1px" class="q-mt-sm" dark />
 
         <EssentialLink
           v-for="link in essentialLinks"
@@ -109,11 +120,13 @@ import ListNotifications, {
   NotificationsProps,
 } from 'src/components/Notify/ListNotifications.vue';
 import jwt_decode from 'jwt-decode';
-import { socket } from 'src/utils/socket'
+import { socket } from 'src/utils/socket';
+import books from 'src/utils/books';
 
 const route = useRoute();
 const routeName = ref<unknown>('');
 const loading = ref(true);
+const miniState = ref(true);
 
 const essentialLinks = ref<EssentialLinkProps>([
   {
@@ -177,8 +190,9 @@ const notifications = ref<NotificationsProps>([])
 const unReadCounts = ref(0);
 const decodedToken = jwt_decode(LocalStorage.getItem('token'));
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
+const toggleLeftDrawer = () => {
+  leftDrawerOpen.value = true;
+  miniState.value = !miniState.value;
 }
 
 const checkLibrarianIsAdmin = async () => {
@@ -231,6 +245,7 @@ const readAllNotifications = async () => {
 
 
 onMounted(async () => {
+  await books.getAllContributorsBooks();
   await checkLibrarianIsAdmin();
   await librarianNotifications();
 

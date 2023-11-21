@@ -19,9 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue';
-import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { defineComponent, ref, onMounted } from 'vue';
+import { useUserStore } from 'stores/user-store';
 
 defineComponent({
   name: 'UsersTable',
@@ -36,6 +35,7 @@ interface UserDetails {
 }
 
 const filter = ref('')
+const userStore = useUserStore();
 
 const columns: unknown = [
   {
@@ -78,24 +78,8 @@ const columns: unknown = [
 
 const rows = ref<UserDetails>([]);
 
-const getUserDetails = async () => {
-  try {
-    const response = await api.post('/user/get/details', { user_id: 0 }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
-      }
-    })
-    rows.value = response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
 onMounted(async () => {
-  await getUserDetails();
+  rows.value = userStore.getUsers;
 })
 
-onBeforeUnmount(() => {
-  rows.value = [];
-})
 </script>

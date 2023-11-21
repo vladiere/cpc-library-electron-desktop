@@ -2,9 +2,9 @@
   <q-page padding class="q-mb-xl">
     <!-- content -->
     <div class="column" style="gap: 25px">
-      <UsersTable v-once class="col" />
-      <BooksRecords v-once class="col" />
-      <EbooksRecords v-once class="col" />
+      <UsersTable class="col" />
+      <BooksRecords class="col" />
+      <EbooksRecords class="col" />
     </div>
   </q-page>
 </template>

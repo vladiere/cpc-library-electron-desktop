@@ -240,7 +240,6 @@ import { StaffProps } from 'components/UserProfile/StaffComponent.vue';
 import { api } from 'src/boot/axios';
 import jwt_decode from 'jwt-decode';
 import { LocalStorage, Notify, format } from 'quasar';
-import { SpinnerFacebook } from 'src/utils/loading';
 
 defineComponent({
   name: 'UserProfile',
@@ -361,20 +360,14 @@ const getLibrarianDetails = async () => {
         }
       })
       librarianDetails.value = response.data[0];
-      SpinnerFacebook(false);
   } catch (error) {
     throw error;
   }
 }
 
-onBeforeMount(() => {
-  SpinnerFacebook(true, 'Loading...');
-  getLibrarianDetails();
-})
-
 onMounted(async () => {
+  await getLibrarianDetails();
   await getLibrarianStaffs();
 });
 
-onBeforeUnmount(() => {contacts.value = []})
 </script>

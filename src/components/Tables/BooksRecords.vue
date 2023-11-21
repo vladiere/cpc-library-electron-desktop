@@ -41,10 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import IOldResources from 'src/models/oldResources';
-import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { useBookStore } from 'stores/book-store';
 
 defineComponent({
   name: 'OldResources',
@@ -52,6 +51,7 @@ defineComponent({
 
 const rows = ref<IOldResources[]>([]);
 const filter = ref(null);
+const bookStore = useBookStore();
 
 const columns: unknown = [
   {
@@ -119,25 +119,7 @@ const columns: unknown = [
   },
 ];
 
-const fetchResources = async () => {
-  try {
-    const response = await api.post('/get/all/books/inventory', { limit: 0 }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
-      },
-    });
-
-    rows.value = response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
 onMounted(async () => {
-  await fetchResources();
+  rows.value = bookStore.getBooks;
 });
-
-onBeforeUnmount(() => {
-  rows.value = [];
-})
 </script>

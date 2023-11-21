@@ -10,9 +10,12 @@
     <q-item-section v-if="icon" avatar>
       <q-icon :name="icon" size="34px" />
     </q-item-section>
+
     <q-item-section>
       <q-item-label>{{ title }}</q-item-label>
     </q-item-section>
+
+    <q-tooltip class="bg-grey-10 text-grey-2" :delay="300" anchor="bottom right" self="top middle">{{ title }}</q-tooltip>
   </q-item>
 </template>
 

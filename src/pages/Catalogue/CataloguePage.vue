@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, defineAsyncComponent, onBeforeUnmount } from 'vue';
+import { defineComponent, onMounted, ref, defineAsyncComponent } from 'vue';
 import { ClassificationProps } from 'components/Catalogue/ClassificationNo.vue';
 import { api } from 'src/boot/axios';
 import { LocalStorage, Notify } from 'quasar';
@@ -124,45 +124,17 @@ const form = ref({
 });
 
 const categories: ClassificationProps[] = [
-  {
-    id: 1,
-    ddc: '001-099',
-    name: 'Generalities',
-  },
+  { id: 1, ddc: '001-099', name: 'Generalities', },
   { id: 2, ddc: '100-199', name: 'Philosophy' },
   { id: 3, name: '200-299 Religion', ddc: '200-299' },
-  {
-    id: 4,
-    ddc: '300-399',
-    name: 'Social Science',
-  },
+  { id: 4, ddc: '300-399', name: 'Social Science', },
   { id: 5, ddc: '400-499', name: 'Languages' },
-  {
-    id: 6,
-    ddc: '500-599',
-    name: 'Natural Science',
-  },
-  {
-    id: 7,
-    ddc: '600-699',
-    name: 'Applied Science',
-  },
-  {
-    id: 8,
-    ddc: '700-799',
-    name: 'Arts And Recreation',
-  },
+  { id: 6, ddc: '500-599', name: 'Natural Science', },
+  { id: 7, ddc: '600-699', name: 'Applied Science', },
+  { id: 8, ddc: '700-799', name: 'Arts And Recreation', },
   { id: 9, ddc: '800-899', name: 'Literature' },
-  {
-    id: 10,
-    ddc: '900-999',
-    name: 'Geography And History',
-  },
-  {
-    id: 11,
-    ddc: '92-920',
-    name: 'Biography And Collective Biography',
-  },
+  { id: 10, ddc: '900-999', name: 'Geography And History', },
+  { id: 11, ddc: '92-920', name: 'Biography And Collective Biography', },
 ];
 
 
@@ -278,8 +250,4 @@ onMounted(async () => {
   await getAllCatalog();
 });
 
-onBeforeUnmount(() => {
-  rowsObject.value = [];
-  responseData.value = [];
-})
 </script>

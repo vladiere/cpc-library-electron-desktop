@@ -7,7 +7,7 @@ export const useLibrarianDataStore = defineStore('librarian', {
   }),
   actions: {
     initLibrarian(tokens: unknown) {
-      (this.refresh = tokens.refres),
+      (this.refresh = tokens.refresh),
       (this.token = tokens.token)
     },
     clearLibrarian() {

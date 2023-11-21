@@ -41,9 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
-import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { defineComponent, onMounted, ref } from 'vue';
+import { useBookStore } from 'stores/book-store';
 
 
 defineComponent({
@@ -52,22 +51,7 @@ defineComponent({
 
 const rows = ref([])
 const filter = ref(null);
-
-//  {
-//      "contribution_id": 29,
-//      "user_id": 1,
-//      "author_fullname": "tessa sloan",
-//      "category_name": "roman",
-//      "publisher_name": "mybooks",
-//      "file_title": "billionair boss protector",
-//      "file_path": "billionaire-boss-protector-1700010849089.epub",
-//      "fullname": "lance phillip descartin ",
-//      "department": "bsit",
-//      "file_description": "",
-//      "uploaded_date": "November 15, 2023",
-//      "file_total_downloads": 0,
-//      "file_status": "accepted"
-//  }
+const bookStore = useBookStore();
 
 const columns: unknown = [
   {
@@ -128,25 +112,8 @@ const columns: unknown = [
   },
 ];
 
-
-const getUserContributions = async () => {
-  try {
-    const response = await api.post('/user/book/contribute/list', { user_id: 0, limit: 0 }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
-      }
-    });
-    rows.value = response.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
 onMounted(async () => {
-  await getUserContributions();
+  rows.value = await bookStore.getEbooks;
 });
 
-onBeforeUnmount(() => {
-  rows.value = [];
-})
 </script>

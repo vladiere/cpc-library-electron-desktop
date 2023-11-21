@@ -25,20 +25,6 @@
 
   const filter = ref('');
 
-// contribution_id
-// user_id
-// author_fullname
-// category_name
-// publisher_name
-// file_title
-// file_path
-// fullname
-// department
-// file_description
-// uploaded_date
-// file_total_downloads
-// file_status
-
   const columns: unknown = [
   {
     name: 'fullname',

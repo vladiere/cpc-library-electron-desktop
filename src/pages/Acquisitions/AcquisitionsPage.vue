@@ -42,7 +42,14 @@
         </q-tab-panel>
 
         <q-tab-panel name="contributorsDetails">
-
+          <q-virtual-scroll
+              style="max-height: calc(100vh - 100px)"
+              :items="contributeHistory"
+              separator
+              v-slot="{ item, index }"
+          >
+            <ContributreHistory :key="index" v-bind="item" />
+          </q-virtual-scroll>
         </q-tab-panel>
       </q-tab-panels>
     </q-card>
@@ -50,11 +57,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, defineAsyncComponent, onMounted, onBeforeUnmount } from 'vue';
+import { defineComponent, ref, defineAsyncComponent, onMounted } from 'vue';
 import { ContributorsProps } from 'components/Acquisitions/ContributorsComponent.vue';
 import { api } from 'src/boot/axios';
 import { LocalStorage } from 'quasar';
 import { socket } from 'src/utils/socket';
+import { useBookStore } from 'stores/book-store';
+import { ContributeHistoryProps } from 'components/Acquisitions/ContributreHistory.vue';
 
 defineComponent({
   name: 'AcquisitionsPage',
@@ -75,8 +84,17 @@ const ContributorsComponent = defineAsyncComponent({
   timeout: 2300,
   suspensible: false
 });
+
+const ContributreHistory = defineAsyncComponent({
+  loader: () => import('components/Acquisitions/ContributeHistory.vue'),
+  delay: 300,
+  timeout: 2300,
+  suspensible: false
+});
 // Sample data
 const contributorsList = ref<ContributorsProps>([]);
+const contributeHistory = ref<ContributeHistoryProp>([]);
+const bookStore = useBookStore();
 
 const getContributors = async () => {
   try {
@@ -98,13 +116,11 @@ const handleActionPerformed = async (data: object) => {
 }
 
 onMounted(async () => {
+  contributeHistory.value = bookStore.getEbooks;
   await getContributors();
   await socket.on('new_notification', async () => {
     await getContributors();
   })
 });
 
-onBeforeUnmount(() => {
-  contributorsList.value = [];
-})
 </script>

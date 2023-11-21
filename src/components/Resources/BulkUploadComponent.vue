@@ -150,7 +150,7 @@ const handleClick = async () => {
   try {
     const response = await api.post(
       'upload/bulk/record',
-      { jsonRecords: dataToSend.value },
+      { jsonRecords: JSON.stringify(dataToSend.value).toLowerCase() },
       {
         headers: {
           Authorization: `Bearer ${LocalStorage.getItem('token')}`,
@@ -159,6 +159,7 @@ const handleClick = async () => {
       }
     );
 
+    console.log('Uploaded Clicked')
     console.log(response.data);
 
     Notify.create({

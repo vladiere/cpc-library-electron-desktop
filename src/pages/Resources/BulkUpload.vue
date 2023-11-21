@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { LocalStorage, Notify } from 'quasar';
 import { defineComponent, ref } from 'vue';
-import BulkUploadComponent from 'src/components/Resources/BulkUploadComponent.vue';
+import BulkUploadComponent from 'components/Resources/BulkUploadComponent.vue';
 
 defineComponent({
   name: 'BulkUpload',
