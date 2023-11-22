@@ -245,11 +245,8 @@ defineComponent({
   name: 'UserProfile',
 });
 
-const StaffComponent = defineAsyncComponent(() =>
-  import('components/UserProfile/StaffComponent.vue')
-);
+const StaffComponent = defineAsyncComponent(() => import('components/UserProfile/StaffComponent.vue'));
 
-const { capitalize } = format;
 const librarianDetails = ref([]);
 const decoded = jwt_decode(LocalStorage.getItem('token'));
 const form = ref({
@@ -270,7 +267,7 @@ const form = ref({
   privilege: '',
 });
 
-const stringFormatter = (wordstring: string) => wordstring ? capitalize(wordstring) : '';
+const stringFormatter = (wordstring: string) => wordstring ? format.capitalize(wordstring) : '';
 
 const formatPhoneNumber = () => {
   // Remove all non-numeric characters from the input
