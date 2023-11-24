@@ -51,6 +51,7 @@ function createWindow() {
   });
 
   Menu.setApplicationMenu(null);
+  mainWindow.removeMenu();
 }
 
 app.whenReady().then(createWindow);
