@@ -66,6 +66,7 @@ import { defineComponent, ref } from 'vue';
 import { loginApi } from 'src/boot/axios';
 import { LocalStorage, Notify } from 'quasar';
 import { useRouter } from 'vue-router';
+import { useLibrarianDataStore } from 'stores/user';
 
 defineComponent({
   name: 'LoginPage',
@@ -78,6 +79,7 @@ const form = ref({
 const isPwd = ref(true);
 const router = useRouter();
 const loading = ref(false);
+const userStore = useLibrarianDataStore();
 
 const handleSubmit = async () => {
   loading.value = true;
@@ -93,6 +95,8 @@ const handleSubmit = async () => {
 
     LocalStorage.set('token', response.data.user.accessToken);
     LocalStorage.set('refresh', response.data.user.refreshToken);
+    userStore.initLibrarian(response.data.user.accessToken,response.data.user.refreshToken);
+
     router.push('/dashboard');
   } catch (error: unknown) {
     loading.value = false;

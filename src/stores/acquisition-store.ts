@@ -17,6 +17,5 @@ export const useAcquisitionStore = defineStore('acquisition', {
     clearAcquisition () {
       this.acquisition = [];
     },
-
   }
 });

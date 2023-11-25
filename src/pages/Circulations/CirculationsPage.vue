@@ -41,22 +41,52 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, defineAsyncComponent, ref } from 'vue';
-import Holds from 'src/components/Circulations/HoldsComponent.vue';
-import FinesAndFees from 'src/components/Circulations/FinesAndFeesComponent.vue';
-import Borrow from 'src/components/Circulations/BorrowComponent.vue';
-import Renewal from 'src/components/Circulations/RenewalComponent.vue';
+import { defineComponent, defineAsyncComponent, ref, onMounted } from 'vue';
+import circulations from 'src/utils/circulations';
 
 defineComponent({
   name: 'CirculationsPage',
 });
 
+const tab = ref('reservations');
+
 const Reservations = defineAsyncComponent({
   loader: () => import('components/Circulations/ReservationComponent.vue'),
   delay: 200,
-  timeout: 2000,
-  suspensible: false
+  timeout: 5000,
+  suspensible: true,
 });
 
-const tab = ref('reservations');
+const Holds = defineAsyncComponent({
+  loader: () => import('components/Circulations/HoldsComponent.vue'),
+  delay: 200,
+  timeout: 5000,
+  suspensible: true,
+});
+
+const FinesAndFees = defineAsyncComponent({
+  loader: () => import('components/Circulations/FinesAndFeesComponent.vue'),
+  delay: 200,
+  timeout: 5000,
+  suspensible: true,
+});
+
+const Borrow = defineAsyncComponent({
+  loader: () => import('components/Circulations/BorrowComponent.vue'),
+  delay: 200,
+  timeout: 5000,
+  suspensible: true,
+});
+
+const Renewal = defineAsyncComponent({
+  loader: () => import('components/Circulations/RenewalComponent.vue'),
+  delay: 200,
+  timeout: 5000,
+  suspensible: true,
+});
+
+
+onMounted(async() => {
+  await circulations.getCirculations();
+});
 </script>
