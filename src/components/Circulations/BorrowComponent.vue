@@ -23,6 +23,7 @@
           color="blue-9"
           text-color="grey-2"
           dense
+          padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
           @click="handleClick('accept', selected)"
@@ -32,6 +33,7 @@
           color="red"
           text-color="grey-2"
           dense
+          padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
           @click="handleClick('cancel', selected)"
@@ -54,10 +56,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { api } from 'src/boot/axios'
-import { LocalStorage, Notify } from 'quasar'
+import { LocalStorage, debounce, Notify, date } from 'quasar'
 import { socket } from 'src/utils/socket';
+import { ICirculation } from 'src/models/circulations';
+import circulations from 'src/utils/circulations';
+import { useCirculationStore } from 'stores/circulation-store';
 
 defineComponent({
   name: 'BorrowComponent',
@@ -65,6 +70,9 @@ defineComponent({
 
 const filter = ref('');
 const selected = ref([]);
+const circulationStore = useCirculationStore();
+const timeStamp = Date.now();
+const formattedString = date.formatDate(timeStamp, 'MMMM D, YYYY');
 
 const columns: unknown = [
   {
@@ -122,70 +130,58 @@ const getSelectedString = () => {
       } selected of ${rows.value.length}`;
 };
 
-
-const getAllPendingBorrowed = async () => {
+const acceptBorrows = debounce(async(endpoint: string, transaction_id: number) => {
   try {
-      const response = await api.post('/transactions/all', { option: 'Borrowed' }, {
-        headers: {
-          Authorization: `Bearer ${LocalStorage.getItem('token')}`
-        }
-      })
-      if (response.data) {
-        rows.value = [];
-        rows.value = response.data;
+    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
+      headers: {
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
-  } catch (error) {
-    throw error;
-  }
-};
-
-const handleClick = async (option: string, data_set: object) => {
-  try {
-    data_set.map(async (item: unknown) => {
-      let endpoint = '';
-      switch (option) {
-        case 'accept':
-          endpoint = '/transaction/approve'
-          break;
-        case 'cancel':
-          endpoint = '/transaction/cancel'
-          break;
-
-        default:
-          throw new Error('unknown option')
-          break;
-      }
-      const response = await api.post(endpoint, { transaction_id: item.pending_transaction_id }, {
-        headers: {
-          Authorization: `Bearer ${LocalStorage.getItem('token')}`
-        }
-      });
+    });
       selected.value = [];
-
-      await getAllPendingBorrowed();
-      await socket.emit('notifications', item.pending_transaction_id);
 
       Notify.create({
         message: response.data.message,
         timeout: 1500,
-        position: 'top-right'
-      })
-    })
+        progress: true,
+        position: 'top'
+      });
+
+    if (response.status == 200) circulationStore.deleteCirculations('borrows', transaction_id);
+  } catch (error) {
+    throw error;
+  }
+}, 1500);
+
+const handleClick = async (option: string, data_set: object) => {
+  try {
+    let endpoint = '';
+    switch (option) {
+      case 'accept':
+        endpoint = '/transaction/approve'
+        break;
+      case 'cancel':
+        endpoint = '/transaction/cancel'
+        break;
+
+      default:
+        throw new Error('unknown option')
+        break;
+    }
+
+    data_set.map(async (item: unknown) => {
+
+      await acceptBorrows(endpoint,item.pending_transaction_id);
+    });
   } catch (error) {
     throw error;
   }
 };
 
+onMounted(() => {
+  rows.value = circulationStore.getBorrows;
+});
 
-
-onMounted(async () => {
-  await getAllPendingBorrowed();
-
-  await socket.on('new_notification', async (data) => {
-    if (data) {
-      await getAllPendingBorrowed();
-    }
-  })
+watch(() => circulationStore.getBorrows, () => {
+  rows.value = circulationStore.getBorrows;
 })
-
 </script>

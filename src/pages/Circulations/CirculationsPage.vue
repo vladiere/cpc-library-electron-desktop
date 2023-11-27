@@ -43,6 +43,8 @@
 <script setup lang="ts">
 import { defineComponent, defineAsyncComponent, ref, onMounted } from 'vue';
 import circulations from 'src/utils/circulations';
+import { debounce } from 'quasar';
+import { SpinnerFacebook } from 'src/utils/loading';
 
 defineComponent({
   name: 'CirculationsPage',
@@ -85,8 +87,18 @@ const Renewal = defineAsyncComponent({
   suspensible: true,
 });
 
+const getCirculations = debounce(async() => {
+  try {
+    await circulations.getCirculations();
+  } catch (error) {
+    throw error;
+  } finally {
+    SpinnerFacebook(false);
+  }
+},1500)
 
 onMounted(async() => {
-  await circulations.getCirculations();
+  SpinnerFacebook(true, 'Loading...');
+  await getCirculations();
 });
 </script>

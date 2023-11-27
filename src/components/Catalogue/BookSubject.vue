@@ -2,7 +2,7 @@
   <q-table
     title="Book Catalog"
     class="text-capitalize"
-    style="max-height: 350px"
+    style="max-height: calc(100vh - 260px)"
     :rows="$props.rowsObject"
     :columns="columns"
     row-key="name"

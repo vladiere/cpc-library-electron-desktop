@@ -42,6 +42,7 @@
         </q-tab-panel>
 
         <q-tab-panel name="contributorsDetails">
+          <div class="text-h3 text-weight-light text-grey-7 text-center flex flex-center" v-if="contributeHistory.length === 0">Contributors History is empty</div>
           <q-virtual-scroll
               style="max-height: calc(100vh - 100px)"
               :items="contributeHistory"
@@ -60,7 +61,7 @@
 import { defineComponent, ref, defineAsyncComponent, onMounted } from 'vue';
 import { ContributorsProps } from 'components/Acquisitions/ContributorsComponent.vue';
 import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { LocalStorage, debounce } from 'quasar';
 import { socket } from 'src/utils/socket';
 import { useBookStore } from 'stores/book-store';
 import { ContributeHistoryProps } from 'components/Acquisitions/ContributreHistory.vue';
@@ -96,7 +97,7 @@ const contributorsList = ref<ContributorsProps>([]);
 const contributeHistory = ref<ContributeHistoryProp>([]);
 const bookStore = useBookStore();
 
-const getContributors = async () => {
+const getContributors = debounce(async () => {
   try {
     const response = await api.post('/contributors/get/all', { file_status: 'pending' }, {
       headers: {
@@ -107,7 +108,7 @@ const getContributors = async () => {
   } catch (error) {
     throw error;
   }
-}
+}, 1500);
 
 const handleActionPerformed = async (data: object) => {
   if (data) {

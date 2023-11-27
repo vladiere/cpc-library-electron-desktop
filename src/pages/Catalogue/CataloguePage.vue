@@ -68,7 +68,7 @@
       <q-tab-panel name="classification" class="q-gutter-md">
         <div class="text-h6">Dewey Decimal Classification</div>
         <q-virtual-scroll
-          style="max-height: 300px"
+          style="max-height:calc(100vh - 245px)"
           :items="categories"
           separator
           v-slot="{ item, index }"

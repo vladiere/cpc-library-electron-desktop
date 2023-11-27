@@ -1,4 +1,6 @@
 <template>
+<q-page>
+  <LoadingComponent  v-if="loading"/>
   <div class="relative">
     <div class="flex flex-center fullscreen">
       <q-img
@@ -59,14 +61,16 @@
       </q-form>
     </div>
   </div>
+</q-page>
 </template>
 
 <script setup lang="ts">
 import { defineComponent, ref } from 'vue';
 import { loginApi } from 'src/boot/axios';
-import { LocalStorage, Notify } from 'quasar';
+import { LocalStorage, debounce, Notify } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useLibrarianDataStore } from 'stores/user';
+import LoadingComponent from 'components/Loaders/LoadingComponent.vue';
 
 defineComponent({
   name: 'LoginPage',
@@ -80,12 +84,11 @@ const isPwd = ref(true);
 const router = useRouter();
 const loading = ref(false);
 const userStore = useLibrarianDataStore();
+const loginInvalidPrompt = ref('');
 
-const handleSubmit = async () => {
-  loading.value = true;
-
+const submitLogin = debounce(async () => {
   try {
-    const response = await loginApi.post('login/librarian', {
+     const response = await loginApi.post('login/librarian', {
       form: form.value,
     },{
       headers: {
@@ -97,17 +100,34 @@ const handleSubmit = async () => {
     LocalStorage.set('refresh', response.data.user.refreshToken);
     userStore.initLibrarian(response.data.user.accessToken,response.data.user.refreshToken);
 
+    loading.value = false;
     router.push('/dashboard');
   } catch (error: unknown) {
     loading.value = false;
-    console.log(error.response.data);
-    console.log(error);
-    Notify.create({
-      position: 'top',
-      message: error.response.data.error,
-      color: 'negative',
-      timeout: 3000,
-    });
+    loginInvalidPrompt.value = error.response.data.error;
+    throw error;
+  } finally {
+    loading.value = false;
+    if (loginInvalidPrompt.value){
+      Notify.create({
+        position: 'top',
+        message: loginInvalidPrompt.value,
+        progress: true,
+        color: 'negative',
+        timeout: 3000,
+      });
+      loginInvalidPrompt.value = '';
+    }
   }
+}, 1500)
+
+const handleSubmit = async () => {
+  try {
+    loading.value = true;
+    await submitLogin();
+  } catch (error: unknown) {
+    loading.value = false;
+    console.error(error);
+   }
 };
 </script>

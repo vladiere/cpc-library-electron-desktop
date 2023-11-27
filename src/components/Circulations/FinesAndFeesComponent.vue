@@ -39,8 +39,9 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
-import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { ICirculation } from 'src/models/circulations';
+import circulations from 'src/utils/circulations';
+import { useCirculationStore } from 'stores/circulation-store';
 
 defineComponent({
   name: 'FinesAndFees',
@@ -48,6 +49,7 @@ defineComponent({
 
 const filter = ref('');
 const selected = ref([]);
+const circulationStore = useCirculationStore();
 
 const columns = [
   {
@@ -104,27 +106,7 @@ const columns = [
 
 const rows = ref([])
 
-const handleClick = (items: object) => {
-  console.log(items);
-};
-
-const getAllFinesFeesSummary = async () => {
-  try {
-    const response = await api.get('/transaction/fines_fees/summary', {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
-      }
-    });
-    if (response.data) {
-      rows.value = [];
-      rows.value = response.data;
-    }
-  } catch (error) {
-    throw error;
-  }
-}
-
-onMounted( async () => {
-  await getAllFinesFeesSummary();
+onMounted(() => {
+  rows.value = circulationStore.getFineFess;
 });
 </script>

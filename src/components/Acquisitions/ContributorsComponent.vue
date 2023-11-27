@@ -70,10 +70,10 @@
 import { format, Notify } from 'quasar';
 import { linkfile } from 'src/utils/links';
 import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { LocalStorage, debounce } from 'quasar';
 import { socket } from 'src/utils/socket';
 
-const emit = defineEmits(['actionPerformed'])
+const emit = defineEmits(['actionPerformed']);
 
 export interface ContributorsProps {
   contribution_id: number;
@@ -111,7 +111,7 @@ const wordFormatter = (word: string) => {
   return format.capitalize(word);
 }
 
-const manageUserContributions = async (action: string, user_id: number, p_status: string, contribution_id: number) => {
+const handleContributions = debounce(async (action: string, user_id: number, p_status: string, contribution_id: number) => {
   try {
     const response = await api.post('/contributors/manage', { action, user_id, p_status, contribution_id }, {
       headers: {
@@ -128,6 +128,14 @@ const manageUserContributions = async (action: string, user_id: number, p_status
       emit('actionPerformed', { action, user_id, p_status, contribution_id });
       socket.emit('notifications', user_id);
     }
+  } catch (error) {
+    throw error;
+  }
+}, 1500)
+
+const manageUserContributions = async (action: string, user_id: number, p_status: string, contribution_id: number) => {
+  try {
+    await handleContributions();
   } catch (error) {
     throw error;
   }

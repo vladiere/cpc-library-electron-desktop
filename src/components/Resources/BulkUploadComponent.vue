@@ -67,7 +67,7 @@ const columns: unknown = ref([
     required: true,
     label: 'Accession No.',
     align: 'center',
-    field: 'Accession No',
+    field: 'Accession No.',
     sortable: true,
   },
   {
@@ -131,7 +131,7 @@ const columns: unknown = ref([
     required: true,
     label: 'Copyright Yr.',
     align: 'center',
-    field: 'Copyright Yr',
+    field: 'Copyright Yr.',
     sortable: true,
   },
   {

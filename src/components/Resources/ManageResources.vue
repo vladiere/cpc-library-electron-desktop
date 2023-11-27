@@ -6,7 +6,7 @@
     :columns="columns"
     row-key="name"
     :pagination="{
-      rowsPerPage: 10,
+      rowsPerPage: 8,
       sortBy: 'name',
     }"
     :filter="filter"
@@ -58,18 +58,6 @@ defineComponent({
 
 const router = useRouter();
 const filter = ref('');
-
-// book_id
-// author_name
-// title
-// edition
-// publisher_name
-// cost_price
-// copies
-// borrowed_copies
-// book_status
-// img_path
-// total_checkedout
 
 const columns: unknown = ref([
   {

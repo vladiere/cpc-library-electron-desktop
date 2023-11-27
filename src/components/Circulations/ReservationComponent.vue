@@ -23,6 +23,7 @@
           color="blue-9"
           text-color="grey-2"
           dense
+          padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
           @click="handleClick('accept', selected[0].pending_transaction_id)"
@@ -32,6 +33,7 @@
           color="red"
           text-color="grey-2"
           dense
+          padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
           @click="handleClick('cancel', selected[0].pending_transaction_id)"
@@ -54,10 +56,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
-import { api } from 'src/boot/axios'
-import { LocalStorage, Notify } from 'quasar';
-import { socket } from 'src/utils/socket'
+import { defineComponent, watch, ref, onMounted } from 'vue';
+import { debounce, Notify } from 'quasar';
+import { useCirculationStore } from 'stores/circulation-store';
+import circulations from 'src/utils/circulations';
+import { ICirculation } from 'src/models/circulations';
 
 defineComponent({
   name: 'ReservationComponent',
@@ -65,16 +68,7 @@ defineComponent({
 
 const filter = ref('');
 const selected = ref([]);
-
-interface PendingTransactions {
-  pending_transaction_id: number;
-  title: string;
-  fullname: string;
-  transaction_type: string;
-  status: string;
-  request_date: string;
-  approve_date: string;
-}
+const circulationStore = useCirculationStore();
 
 const columns = [
   {
@@ -118,7 +112,7 @@ const columns = [
   },
 ];
 
-const rows = ref<PendingTransactions>([]);
+const rows = ref<ICirculation>([]);
 
 const getSelectedString = () => {
   return selected.value.length === 0
@@ -128,23 +122,21 @@ const getSelectedString = () => {
       } selected of ${rows.value.length}`;
 };
 
-const getAllPendingReservation = async () => {
+const acceptReservation = debounce(async(endpoint: string, transaction_id: number) => {
   try {
-      const response = await api.post('/transactions/all', { option: 'Reserved' }, {
-        headers: {
-          Authorization: `Bearer ${LocalStorage.getItem('token')}`
-        }
-      })
-      if (response.data) {
-        rows.value = [];
-        rows.value = response.data
+    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
+      headers: {
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
+    });
+
+    if (response.status == 200) circulationStore.deleteCirculations('reservations', transaction_id);
   } catch (error) {
     throw error;
   }
-}
+})
 
-const handleClick = async (option: string, transaction_id: number) => {
+const handleClick = async (option: string, data_set: object) => {
   try {
     let endpoint = '';
     console.log(transaction_id)
@@ -160,33 +152,28 @@ const handleClick = async (option: string, transaction_id: number) => {
         throw new Error('unknown option')
         break;
     }
-    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
-      }
-    });
-    selected.value = [];
+    data_set.map(async (item: unknown) => {
 
-    await getAllPendingReservation();
-    await socket.emit('notification', transaction_id)
+      await acceptReservation(endpoint, item.pending_transaction_id);
+      selected.value = [];
 
-    Notify.create({
-      message: response.data.message,
-      timeout: 1500,
-      position: 'top-right'
+      Notify.create({
+        message: response.data.message,
+        timeout: 1500,
+        position: 'top-right'
+      });
     });
   } catch (error) {
     throw error;
   }
 };
 
-onMounted(async () => {
-  await getAllPendingReservation();
+onMounted(() => {
+  rows.value = circulationStore.getReservations;
+});
 
-  await socket.on('new_notification', async (data) => {
-    if (data) {
-      await getAllPendingReservation();
-    }
-  })
+watch(() => circulationStore.getReservations, () => {
+  rows.value = circulationStore.getReservations;
 })
+
 </script>

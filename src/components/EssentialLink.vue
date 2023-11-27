@@ -3,7 +3,7 @@
     clickable
     v-ripple
     v-if="visibility"
-    :to="link"
+    :to="link !== 'logout' ? link : ''"
     @click="handleClick(link)"
     active-class="text-grey-1"
   >
@@ -21,9 +21,11 @@
 
 <script setup lang="ts">
 import { useLibrarianDataStore } from 'stores/user';
-import { LocalStorage } from 'quasar';
+import { LocalStorage, debounce } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter } from 'vue-router';
+import { SpinnerFacebook } from 'src/utils/loading';
+import { ref } from 'vue';
 
 export interface EssentialLinkProps {
   title: string;
@@ -44,11 +46,9 @@ withDefaults(defineProps<EssentialLinkProps>(), {
 const librarianStore = useLibrarianDataStore();
 const router = useRouter();
 
-const handleClick = async (link: string) => {
-  if (link === 'logout') {
-    const response = await api.post(
-      '/logout/librarian',
-      { refreshToken: LocalStorage.getItem('refresh') as string },
+const logoutUser = debounce(async() => {
+  try {
+    const response = await api.post( '/logout/librarian', { refreshToken: LocalStorage.getItem('refresh') as string },
       {
         headers: {
           Authorization: `Bearer ${LocalStorage.getItem('token') as string}`,
@@ -63,6 +63,17 @@ const handleClick = async (link: string) => {
     } else {
       console.log(response.data);
     }
+  } catch (error) {
+    throw error;
+  } finally {
+    SpinnerFacebook(false);
+  }
+}, 1500)
+
+const handleClick = async (link: string) => {
+  if (link === 'logout') {
+    SpinnerFacebook(true, 'Logging out... Please wait.');
+    await logoutUser();
   }
 };
 
