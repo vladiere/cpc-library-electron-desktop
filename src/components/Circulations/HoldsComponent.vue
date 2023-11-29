@@ -23,6 +23,7 @@
           color="blue-9"
           text-color="grey-2"
           dense
+          :loading="isLoading"
           padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
@@ -33,6 +34,7 @@
           color="red"
           text-color="grey-2"
           dense
+          :loading="isLoading"
           padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
@@ -60,7 +62,8 @@ import { defineComponent, ref, onMounted, watch } from 'vue';
 import { useCirculationStore } from 'stores/circulation-store';
 import circulations from 'src/utils/circulations';
 import { ICirculation } from 'src/models/circulations';
-import { debounce } from 'quasar';
+import { api } from 'boot/axios';
+import { LocalStorage, Notify, debounce } from 'quasar';
 
 defineComponent({
   name: 'ReservationComponent',
@@ -69,6 +72,7 @@ defineComponent({
 const filter = ref('');
 const selected = ref([]);
 const circulationStore = useCirculationStore();
+const isLoading = ref(false);
 
 const columns = [
   {
@@ -122,22 +126,47 @@ const getSelectedString = () => {
       } selected of ${rows.value.length}`;
 };
 
-const acceptHolds = debounce(async(endpoint: string, transaction_id: number) => {
+const acceptHolds = async (endpoint: string, transaction_id: number) => {
   try {
-    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
+    await new Promise(async (resolve, reject) => {
+      try {
+        const response = await api.post(
+          endpoint,
+          { transaction_id: transaction_id },
+          {
+            headers: {
+              Authorization: `Bearer ${LocalStorage.getItem('token')}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          circulationStore.deleteCirculations('holds', transaction_id);
+          Notify.create({
+            message: response.data.message,
+            timeout: 2300,
+            position: 'top',
+            type: response.data.status === 200 || response.data.status === 201 ? 'positive' : 'warning',
+            progress: true,
+          });
+        }
+
+        isLoading.value = false
+        resolve(); // Resolve the promise after the asynchronous operation
+      } catch (error) {
+        isLoading.value = false
+        reject(error); // Reject the promise in case of an error
       }
     });
-
-    if (response.status == 200) circulationStore.deleteCirculations('holds', transaction_id);
   } catch (error) {
     throw error;
   }
-}, 1500);
+};
+
 
 const handleClick = async (option: string, data_set: object) => {
   try {
+    isLoading.value = true;
     let endpoint = '';
     switch (option) {
       case 'accept':
@@ -151,17 +180,10 @@ const handleClick = async (option: string, data_set: object) => {
         throw new Error('unknown option')
         break;
     }
+
     data_set.map(async (item: unknown) => {
       await acceptHolds(endpoint, item.pending_transaction_id);
-      selected.value = [];
-
-      Notify.create({
-        message: response.data.message,
-        timeout: 1500,
-        progess: true,
-        position: 'top'
-      });
-    });
+    })
   } catch (error) {
     throw error;
   }

@@ -235,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, onBeforeUnmount, onBeforeMount, defineAsyncComponent } from 'vue';
+import { defineComponent, onMounted, ref, defineAsyncComponent } from 'vue';
 import { StaffProps } from 'components/UserProfile/StaffComponent.vue';
 import { api } from 'src/boot/axios';
 import jwt_decode from 'jwt-decode';

@@ -23,20 +23,22 @@
           color="blue-9"
           text-color="grey-2"
           dense
+          :loading="isLoading"
           padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
-          @click="handleClick('accept', selected[0].pending_transaction_id)"
+          @click="handleClick('accept', selected)"
         />
         <q-btn
           v-if="selected.length > 0"
           color="red"
           text-color="grey-2"
           dense
+          :loading="isLoading"
           padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
-          @click="handleClick('cancel', selected[0].pending_transaction_id)"
+          @click="handleClick('cancel', selected)"
         />
         <q-input
           square
@@ -57,10 +59,10 @@
 
 <script setup lang="ts">
 import { defineComponent, watch, ref, onMounted } from 'vue';
-import { debounce, Notify } from 'quasar';
+import { debounce, LocalStorage, Notify } from 'quasar';
 import { useCirculationStore } from 'stores/circulation-store';
-import circulations from 'src/utils/circulations';
 import { ICirculation } from 'src/models/circulations';
+import { api } from 'boot/axios';
 
 defineComponent({
   name: 'ReservationComponent',
@@ -69,6 +71,7 @@ defineComponent({
 const filter = ref('');
 const selected = ref([]);
 const circulationStore = useCirculationStore();
+const isLoading = ref(false);
 
 const columns = [
   {
@@ -104,12 +107,6 @@ const columns = [
     field: 'request_date',
     sortable: true,
   },
-  {
-    name: 'approve_date',
-    label: 'Approve Date',
-    field: 'approve_date',
-    sortable: true,
-  },
 ];
 
 const rows = ref<ICirculation>([]);
@@ -122,24 +119,52 @@ const getSelectedString = () => {
       } selected of ${rows.value.length}`;
 };
 
-const acceptReservation = debounce(async(endpoint: string, transaction_id: number) => {
+const acceptReservation = async (endpoint: string, transaction_id: number) => {
   try {
-    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
-      }
-    });
+    await new Promise(async (resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          const response = await api.post(
+            endpoint,
+            { transaction_id: transaction_id },
+            {
+              headers: {
+                Authorization: `Bearer ${LocalStorage.getItem('token')}`,
+              },
+            }
+          );
 
-    if (response.status == 200) circulationStore.deleteCirculations('reservations', transaction_id);
+          if (response.status === 200) {
+            circulationStore.deleteCirculations('reservations', transaction_id);
+            Notify.create({
+              message: response.data.message,
+              timeout: 2300,
+              position: 'top',
+              type: response.data.status === 200 || response.data.status === 201 ? 'positive' : 'warning',
+              progress: true,
+            });
+          }
+
+          selected.value = [];
+          isLoading.value = false;
+          resolve(); // Resolve the promise after the asynchronous operation
+        } catch (error) {
+          selected.value = [];
+          isLoading.value = false;
+          reject(error); // Reject the promise in case of an error
+        }
+      }, 1500);
+    });
   } catch (error) {
     throw error;
   }
-})
+};
+
 
 const handleClick = async (option: string, data_set: object) => {
   try {
+    isLoading.value = true;
     let endpoint = '';
-    console.log(transaction_id)
     switch (option) {
       case 'accept':
         endpoint = '/transaction/approve'
@@ -152,16 +177,9 @@ const handleClick = async (option: string, data_set: object) => {
         throw new Error('unknown option')
         break;
     }
+
     data_set.map(async (item: unknown) => {
-
       await acceptReservation(endpoint, item.pending_transaction_id);
-      selected.value = [];
-
-      Notify.create({
-        message: response.data.message,
-        timeout: 1500,
-        position: 'top-right'
-      });
     });
   } catch (error) {
     throw error;

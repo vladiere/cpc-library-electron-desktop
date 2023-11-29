@@ -2,6 +2,7 @@
   <q-table
     bordered
     :rows="rows"
+    :loading="isLoading"
     :columns="columns"
     row-key="pending_transaction_id"
     class="text-capitalize"
@@ -33,9 +34,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { api } from 'src/boot/axios'
-import { LocalStorage } from 'quasar'
+import { LocalStorage, debounce } from 'quasar'
 
 const filter = ref('');
+const isLoading = ref(false);
 
 const columns = [
   {
@@ -80,7 +82,7 @@ const columns = [
 
 const rows = ref([]);
 
-const getAllCheckedOutReservation = async () => {
+const getAllCheckedOutReservation = debounce(async () => {
   try {
       const response = await api.post('/transaction/book/all', {
         option: 'Returned',
@@ -96,10 +98,13 @@ const getAllCheckedOutReservation = async () => {
       }
   } catch (error) {
     throw error;
+  } finally {
+    isLoading.value = false;
   }
-}
+}, 1500);
 
 onMounted( async () => {
+  isLoading.value = true;
   await getAllCheckedOutReservation();
 });
 

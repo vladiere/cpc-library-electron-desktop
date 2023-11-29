@@ -100,15 +100,15 @@ const submitLogin = debounce(async () => {
     LocalStorage.set('refresh', response.data.user.refreshToken);
     userStore.initLibrarian(response.data.user.accessToken,response.data.user.refreshToken);
 
-    loading.value = false;
     router.push('/dashboard');
   } catch (error: unknown) {
     loading.value = false;
     loginInvalidPrompt.value = error.response.data.error;
     throw error;
   } finally {
-    loading.value = false;
+    loading.value = true;
     if (loginInvalidPrompt.value){
+      loading.value = false;
       Notify.create({
         position: 'top',
         message: loginInvalidPrompt.value,

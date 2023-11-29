@@ -54,7 +54,7 @@ const chartOptions = {
     categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
   },
   title: {
-    text: 'Most Borrowed Books',
+    text: 'Popular borrowed books',
   },
   fill: {
     opacity: 1,

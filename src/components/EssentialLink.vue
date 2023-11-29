@@ -25,7 +25,6 @@ import { LocalStorage, debounce } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter } from 'vue-router';
 import { SpinnerFacebook } from 'src/utils/loading';
-import { ref } from 'vue';
 
 export interface EssentialLinkProps {
   title: string;

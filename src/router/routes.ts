@@ -55,6 +55,17 @@ if (Platform.is.electron) {
       ],
     },
     {
+      path: '/history',
+      component: () => import('layouts/MainLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'History',
+          component: () => import('pages/History/HistoryPage.vue')
+        },
+      ]
+    },
+    {
       path: '/resources',
       component: () => import('layouts/MainLayout.vue'),
       children: [

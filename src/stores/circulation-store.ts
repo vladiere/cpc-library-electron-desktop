@@ -80,25 +80,25 @@ export const useCirculationStore = defineStore('circulation', {
         case 'reservations':
           index = this.reservations.findIndex(reserve => reserve.pending_transaction_id === id);
           if (index !== -1) {
-            reservations.splice(index, 1);
+            this.reservations.splice(index, 1);
           }
           break;
         case 'holds':
           index = this.holds.findIndex(held => held.pending_transaction_id === id);
           if (index !== -1) {
-            holds.splice(index, 1);
+            this.holds.splice(index, 1);
           }
            break;
         case 'borrows':
           index = this.borrows.findIndex(borrow => borrow.pending_transaction_id === id);
           if (index !== -1) {
-            borrows.splice(index, 1);
+            this.borrows.splice(index, 1);
           }
           break;
         case 'renewals':
           index = this.renewals.findIndex(renew => renew.renewal_id === id);
           if (index !== -1) {
-            renewals.splice(index, 1);
+            this.renewals.splice(index, 1);
           }
           break;
         default:

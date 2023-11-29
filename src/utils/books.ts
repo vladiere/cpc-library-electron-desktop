@@ -8,7 +8,7 @@ const userStore = useUserStore();
 
 const getAllContributorsBooks = async () => {
   try {
-    if (bookStore.getBooks.length === 0 && bookStore.getEbooks.length === 0) {
+    if (bookStore.getBooks.length === 0 || bookStore.getEbooks.length === 0) {
       const response = await api.get('/contributorsbooks/all', {
         headers: {
           Authorization: `Bearer ${LocalStorage.getItem('token')}`

@@ -1,8 +1,9 @@
 <template>
   <q-item>
     <q-item-section>
-      <q-item-label overline class="text-uppercase">{{ fullname }} - {{ department }}</q-item-label>
-      <q-item-label>{{ wordFormatter(file_title) }} - {{ wordFormatter(category_name) }}</q-item-label>
+      <q-item-label overline class="text-uppercase text-h6">{{ fullname }} - {{ department }}</q-item-label>
+      <q-item-label class="text-capitalize">{{ wordFormatter(file_title) }}</q-item-label>
+      <q-item-label class="text-body text-capitalize">category: [ {{ category_name }} ]</q-item-label>
       <q-item-label caption lines="3">{{ wordFormatter(file_description) }}</q-item-label>
     </q-item-section>
 

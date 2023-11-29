@@ -6,8 +6,9 @@
     :columns="columns"
     row-key="name"
     :filter="filter"
+    separator="vertical"
     class="text-capitalize q-pa-md"
-    style="max-width: 75vw"
+    style="max-width: 100%"
     :pagination="{
       rowsPerPage: 10,
       sortBy: 'name',
@@ -25,12 +26,9 @@
         v-model="filter"
         label="Search..."
       >
-        <template v-slot:prepend>
-          <q-icon name="search" />
-        </template>
-        <template v-if="filter" v-slot:append>
+        <template v-slot:append>
           <q-icon
-            name="cancel"
+            :name="filter ? 'cancel' : 'search'"
             @click.stop.prevent="filter = null"
             class="cursor-pointer"
           />
@@ -101,6 +99,7 @@ const columns: unknown = [
     align: 'left',
     field: 'department',
     sortable: true,
+    style: 'text-transform: uppercase',
   },
   {
     name: 'file_total_downloads',

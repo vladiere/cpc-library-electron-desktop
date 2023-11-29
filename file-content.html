@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>File Content</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="file-content"> </div>
+
+    <script>
+      const { ipRenderer } = require('electron');
+      ipRenderer.on('file-content', (event, { filePath }) => {
+        document.getElementById('file-content').innerText = `File Content: ${filePath}`
+      })
+    </script>
+  </body>
+</html>

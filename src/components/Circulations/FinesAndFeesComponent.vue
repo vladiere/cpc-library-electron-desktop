@@ -39,8 +39,6 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
-import { ICirculation } from 'src/models/circulations';
-import circulations from 'src/utils/circulations';
 import { useCirculationStore } from 'stores/circulation-store';
 
 defineComponent({

@@ -27,3 +27,12 @@
  *   }
  * }
  */
+import { ipcRenderer, contextBridge } from 'electron';
+
+contextBridge.exposeInMainWorld('electron', {
+  ipcRenderer: ipcRenderer,
+})
+
+ipcRenderer.on('download-file', (event, fileToDownload) => {
+  window.api.send('download-file', fileToDownload);
+})

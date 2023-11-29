@@ -1,7 +1,8 @@
 
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
 import path from 'path';
 import os from 'os';
+import { download } from 'electron-dl';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -61,6 +62,20 @@ app.on('window-all-closed', () => {
   if (platform !== 'darwin') {
     app.quit();
   }
+});
+
+ipcMain.on('download-file', async(event, fileToDownload) => {
+  const win = BrowserWindow.getFocusedWindow();
+  const { filePath } = await dialog.showSaveDialog(win, {
+    title: 'Save download',
+    defaultPath: fileToDownload
+  })
+
+  if (!filePath) return
+
+  download(win, fileToDownload, {
+    directory: '',
+  }).catch(error => console.error('Error downloading file: ', error));
 });
 
 app.on('activate', () => {

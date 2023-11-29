@@ -1,6 +1,7 @@
 <template>
   <q-table
     bordered
+    :loading="isLoading"
     :rows="rows"
     :columns="columns"
     row-key="pending_transaction_id"
@@ -47,10 +48,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { api } from 'src/boot/axios'
-import { LocalStorage, Notify } from 'quasar'
+import { LocalStorage, debounce, Notify } from 'quasar'
 import { socket } from 'src/utils/socket';
 
 const filter = ref('');
+const isLoading = ref(false);
 
 const columns = [
   {
@@ -115,7 +117,7 @@ const columns = [
 
 const rows = ref([]);
 
-const getAllApprovedReservation = async () => {
+const getAllApprovedReservation = debounce(async () => {
   try {
       const response = await api.post('/transaction/book/all', {
         option: 'Checked Out',
@@ -131,10 +133,12 @@ const getAllApprovedReservation = async () => {
       }
   } catch (error) {
     throw error;
+  } finally {
+    isLoading.value = false;
   }
-}
+}, 1500);
 
-const handleClick = async (transaction_id: number, option: string) => {
+const checkoutCirculation = debounce(async (transaction_id: number, option: string) => {
   try {
     const response = await api.post('/transaction/book/check_return', { transaction_id: transaction_id, transaction_type: 'Checked Out', transaction_status: option }, {
       headers: {
@@ -142,20 +146,35 @@ const handleClick = async (transaction_id: number, option: string) => {
       }
     });
 
-    await getAllApprovedReservation();
-    await socket.emit('notifications', transaction_id);
+    if (response.status === 200) {
+      await getAllApprovedReservation();
+      await socket.emit('notifications', transaction_id);
 
-    Notify.create({
-      message: response.data.message,
-      position: 'top-right',
-      timeout: 2300,
-    });
+      Notify.create({
+        message: response.data.message,
+        position: 'top',
+        type: response.data.status === 200 || 201 ? 'positive' : 'warning',
+        timeout: 2300,
+      });
+    }
+  } catch (error) {
+    throw error;
+  } finally {
+
+  }
+}, 500);
+
+const handleClick = async (transaction_id: number, option: string) => {
+  try {
+    isLoading.value = true;
+    await checkoutCirculation(transaction_id,option);
   } catch (error) {
     throw error;
   }
 }
 
 onMounted( async () => {
+  isLoading.value = true;
   await getAllApprovedReservation();
 });
 

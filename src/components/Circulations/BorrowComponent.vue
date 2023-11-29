@@ -23,6 +23,7 @@
           color="blue-9"
           text-color="grey-2"
           dense
+          :loading="isLoading"
           padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Accept' : 'Accept All'"
@@ -33,6 +34,7 @@
           color="red"
           text-color="grey-2"
           dense
+          :loading="isLoading"
           padding="5px 15px"
           no-caps
           :label="selected.length === 1 ? 'Cancel' : 'Cancel All'"
@@ -58,10 +60,7 @@
 <script setup lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import { api } from 'src/boot/axios'
-import { LocalStorage, debounce, Notify, date } from 'quasar'
-import { socket } from 'src/utils/socket';
-import { ICirculation } from 'src/models/circulations';
-import circulations from 'src/utils/circulations';
+import { LocalStorage, debounce, Notify } from 'quasar'
 import { useCirculationStore } from 'stores/circulation-store';
 
 defineComponent({
@@ -71,8 +70,7 @@ defineComponent({
 const filter = ref('');
 const selected = ref([]);
 const circulationStore = useCirculationStore();
-const timeStamp = Date.now();
-const formattedString = date.formatDate(timeStamp, 'MMMM D, YYYY');
+const isLoading = ref(false);
 
 const columns: unknown = [
   {
@@ -111,13 +109,6 @@ const columns: unknown = [
     align: 'left',
     sortable: true,
   },
-  {
-    name: 'approve_date',
-    label: 'Approve Date',
-    field: 'approve_date',
-    align: 'left',
-    sortable: true,
-  },
 ];
 
 const rows = ref([]);
@@ -130,30 +121,51 @@ const getSelectedString = () => {
       } selected of ${rows.value.length}`;
 };
 
-const acceptBorrows = debounce(async(endpoint: string, transaction_id: number) => {
+const acceptBorrows = async (endpoint: string, transaction_id: number) => {
   try {
-    const response = await api.post(endpoint, { transaction_id: transaction_id }, {
-      headers: {
-        Authorization: `Bearer ${LocalStorage.getItem('token')}`
-      }
+    await new Promise(async (resolve) => {
+      setTimeout(async () => {
+        try {
+          const response = await api.post(
+            endpoint,
+            { transaction_id: transaction_id },
+            {
+              headers: {
+                Authorization: `Bearer ${LocalStorage.getItem('token')}`,
+              },
+            }
+          );
+
+          if (response.status === 200) {
+            circulationStore.deleteCirculations('borrows', transaction_id);
+            Notify.create({
+              message: response.data.message,
+              timeout: 2300,
+              position: 'top',
+              type: response.data.status === 200 || 201 ? 'positive' : 'warning',
+              progress: true,
+            });
+          }
+
+          selected.value = []
+          isLoading.value = false;
+          resolve(); // Resolve the promise after the asynchronous operation
+        } catch (error) {
+          selected.value = []
+          isLoading.value = false;
+          reject(error); // Reject the promise in case of an error
+        }
+      }, 1500);
     });
-      selected.value = [];
-
-      Notify.create({
-        message: response.data.message,
-        timeout: 1500,
-        progress: true,
-        position: 'top'
-      });
-
-    if (response.status == 200) circulationStore.deleteCirculations('borrows', transaction_id);
   } catch (error) {
     throw error;
   }
-}, 1500);
+};
+
 
 const handleClick = async (option: string, data_set: object) => {
   try {
+    isLoading.value = true;
     let endpoint = '';
     switch (option) {
       case 'accept':
@@ -167,9 +179,7 @@ const handleClick = async (option: string, data_set: object) => {
         throw new Error('unknown option')
         break;
     }
-
-    data_set.map(async (item: unknown) => {
-
+    data_set.forEach(async (item: unknown) => {
       await acceptBorrows(endpoint,item.pending_transaction_id);
     });
   } catch (error) {

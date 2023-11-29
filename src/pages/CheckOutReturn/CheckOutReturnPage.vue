@@ -22,9 +22,6 @@
         <q-tab-panel name="return" class="q-pa-none">
           <ReturnComponent />
         </q-tab-panel>
-        <q-tab-panel name="history" class="q-pa-none">
-          <HistoryReturned />
-        </q-tab-panel>
       </q-tab-panels>
   </q-page>
 </template>
@@ -45,13 +42,6 @@ const CheckedOutComponent = defineAsyncComponent({
 
 const ReturnComponent = defineAsyncComponent({
   loader: () => import('components/CheckedInOut/ReturnComponent.vue'),
-  delay: 300,
-  timeout: 2300,
-  suspensible: false
-});
-
-const HistoryReturned = defineAsyncComponent({
-  loader: () => import('components/CheckedInOut/HistoryBookComponent.vue'),
   delay: 300,
   timeout: 2300,
   suspensible: false

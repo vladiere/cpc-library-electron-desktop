@@ -1,6 +1,7 @@
 <template>
   <q-table
     bordered
+    :loading="isLoading"
     :rows="rows"
     :columns="columns"
     row-key="pending_transaction_id"
@@ -42,10 +43,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { api } from 'src/boot/axios'
-import { LocalStorage, Notify } from 'quasar'
+import { LocalStorage, debounce, Notify } from 'quasar'
 import { socket } from 'src/utils/socket';
 
 const filter = ref('');
+const isLoading = ref(false);
 
 const columns = [
   {
@@ -110,7 +112,7 @@ const columns = [
 
 const rows = ref([]);
 
-const getAllCheckedOutReservation = async () => {
+const getAllCheckedOutReservation = debounce(async () => {
   try {
       const response = await api.post('/transaction/book/all', {
         option: 'Checked Out',
@@ -126,36 +128,48 @@ const getAllCheckedOutReservation = async () => {
       }
   } catch (error) {
     throw error;
+  } finally {
+    isLoading.value = false;
   }
-}
+}, 1500);
 
-const handleClick = async (transaction_id: number) => {
-  console.log(transaction_id)
+const returnCirculation = debounce(async(transaction_id: number) => {
   try {
-    const response = await api.post('/transaction/book/check_return',
-    {
-      transaction_id: transaction_id,
-      transaction_type: 'Returned',
-      transaction_status: 'Completed'
-    }, {
+     const response = await api.post('/transaction/book/check_return', { transaction_id: transaction_id, transaction_type: 'Returned', transaction_status: 'Completed' }, {
       headers: {
         Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
     });
 
-    await getAllCheckedOutReservation();
-    await socket.emit('notifications', transaction_id);
-    Notify.create({
-      message: response.data.message,
-      position: 'top-right',
-      timeout: 2300,
-    });
+    if (response.status === 200) {
+      await getAllCheckedOutReservation();
+      await socket.emit('notifications', transaction_id);
+      Notify.create({
+        message: response.data.message,
+        position: 'top',
+        progress: true,
+        type: response.data.status === 200 || 201 ? 'positive' : 'warning',
+        timeout: 2300,
+      });
+    }
+  } catch (error) {
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+}, 500)
+
+const handleClick = async (transaction_id: number) => {
+  try {
+    isLoading.value = false;
+    await returnCirculation(transaction_id);
   } catch (error) {
     throw error;
   }
 }
 
 onMounted( async () => {
+  isLoading.value = true;
   await getAllCheckedOutReservation();
 });
 

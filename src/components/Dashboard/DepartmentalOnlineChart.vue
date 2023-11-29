@@ -27,7 +27,7 @@ const chartOptions = {
     type: 'pie',
   },
   title: {
-    text: 'Most Department visits',
+    text: 'Department online the most',
     align: 'left',
   },
   labels: ['BSIT', 'BSHM', 'BSED', 'BEED'],

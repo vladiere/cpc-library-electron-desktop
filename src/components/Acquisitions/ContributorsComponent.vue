@@ -18,7 +18,7 @@
         </q-item-label>
         <q-item-label caption lines="1"> {{ wordFormatter(uploaded_date) }} </q-item-label>
         <q-item-label lines="1" class="q-mt-xs" >
-          <q-btn :href="linkfile + '/' + file_path" flat dense color="primary" label="download file" >
+          <q-btn :href="linkfile + '/' + file_path" @click="downloadFile(file_path)" target="_blank" flat dense color="primary" label="download file" >
             <q-tooltip class="bg-grey-10 text-grey-2" :delay="300">Download file to review</q-tooltip>
           </q-btn>
         </q-item-label>
@@ -67,10 +67,9 @@
 </template>
 
 <script setup lang="ts">
-import { format, Notify } from 'quasar';
+import { format, Notify, LocalStorage, debounce } from 'quasar';
 import { linkfile } from 'src/utils/links';
 import { api } from 'src/boot/axios';
-import { LocalStorage, debounce } from 'quasar';
 import { socket } from 'src/utils/socket';
 
 const emit = defineEmits(['actionPerformed']);
@@ -135,9 +134,19 @@ const handleContributions = debounce(async (action: string, user_id: number, p_s
 
 const manageUserContributions = async (action: string, user_id: number, p_status: string, contribution_id: number) => {
   try {
-    await handleContributions();
+    await handleContributions(action,user_id,p_status,contribution_id);
   } catch (error) {
     throw error;
   }
 }
+
+const downloadFile = (fileToDownload: string) => {
+  const fileUrl = linkfile + '/' + fileToDownload
+  if (window.electron.ipcRenderer) {
+    window.electron.ipcRenderer.send('download-file', fileUrl)
+  } else {
+    console.error('ipcRenderer is not Available')
+  }
+}
+
 </script>

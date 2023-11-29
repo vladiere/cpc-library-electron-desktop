@@ -38,7 +38,7 @@
                 <div v-if="notifications.length === 0" class="column items-center q-pa-md text-grey-7">
                   Empty notifications
                 </div>
-                <div v-if="notifications.length > 0" class="column absolute-bottom-right ">
+                <div v-if="notifications.length > 0" class="column absolute-bottom-right q-mr-md q-mb-sm">
                   <q-icon name="mdi-broom" size="2em" color="blue-9" class="cursor-pointer" @click="readAllNotifications">
                     <q-tooltip class="bg-grey-10 text-grey-2" :delay="300">
                      Read all
@@ -175,6 +175,12 @@ const essentialLinks = ref<EssentialLinkProps>([
     title: 'acquisitions',
     icon: 'mdi-cart-outline',
     link: '/acquisitions',
+    visibility: true,
+  },
+  {
+    title: 'history',
+    icon: 'mdi-history',
+    link: '/history',
     visibility: true,
   },
   {

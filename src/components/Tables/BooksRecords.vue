@@ -6,8 +6,10 @@
     :columns="columns"
     row-key="name"
     :filter="filter"
+    :loading="isLoading"
     class="text-capitalize q-pa-md"
-    style="max-width: 75vw"
+    style="max-width: 100%"
+    separator="vertical"
     :pagination="{
       rowsPerPage: 10,
       sortBy: 'name',
@@ -25,12 +27,9 @@
         v-model="filter"
         label="Search..."
       >
-        <template v-slot:prepend>
-          <q-icon name="search" />
-        </template>
-        <template v-if="filter" v-slot:append>
+        <template v-slot:append>
           <q-icon
-            name="cancel"
+            :name="filter ? 'cancel' : 'search'"
             @click.stop.prevent="filter = null"
             class="cursor-pointer"
           />
@@ -52,6 +51,7 @@ defineComponent({
 const rows = ref<IOldResources[]>([]);
 const filter = ref(null);
 const bookStore = useBookStore();
+const isLoading = ref(false);
 
 const columns: unknown = [
   {
@@ -119,7 +119,11 @@ const columns: unknown = [
   },
 ];
 
-onMounted(async () => {
-  rows.value = bookStore.getBooks;
+onMounted(() => {
+  isLoading.value = true;
+  setTimeout(() => {
+    isLoading.value = false;
+    rows.value = bookStore.getBooks;
+  }, 1200);
 });
 </script>

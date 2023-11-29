@@ -11,13 +11,14 @@
 
 <script setup lang="ts">
 import { defineComponent } from 'vue';
+
 defineComponent({
   name: 'OnlineChart',
 });
 
 const series = [
   {
-    name: 'Onlines',
+    name: 'Books borrowed',
     data: [10, 41, 35, 51, 49, 62, 69, 91, 148, 100, 50, 55],
   },
 ];
@@ -37,7 +38,7 @@ const chartOptions = {
     curve: 'straight',
   },
   title: {
-    text: 'Online by this month',
+    text: 'Busy book-borrowing department.',
     align: 'left',
   },
   grid: {

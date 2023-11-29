@@ -17,8 +17,8 @@
     </div>
     <div class="column items-center">
       <div class="row" style="width: 97%; gap: 25px">
-        <RecentVisitChart class="col" />
-        <OnlineChart class="col" />
+        <DepartmentalOnlineChart class="col" />
+        <VolumeBorrowingChart class="col" />
       </div>
     </div>
   </q-page>
@@ -38,15 +38,15 @@ const CardsComponentProps = defineAsyncComponent({
   suspensible: false
 })
 
-const OnlineChart = defineAsyncComponent({
-  loader: () => import('components/Dashboard/OnlineChart.vue'),
+const VolumeBorrowingChart = defineAsyncComponent({
+  loader: () => import('components/Dashboard/VolumeBorrowingChart.vue'),
   delay: 350,
   timeout: 2300,
   suspensible: false
 });
 
-const RecentVisitChart = defineAsyncComponent({
-  loader: () => import('components/Dashboard/RecentVisitChart.vue'),
+const DepartmentalOnlineChart = defineAsyncComponent({
+  loader: () => import('components/Dashboard/DepartmentalOnlineChart.vue'),
   delay: 400,
   timeout: 2300,
   suspensible: false
