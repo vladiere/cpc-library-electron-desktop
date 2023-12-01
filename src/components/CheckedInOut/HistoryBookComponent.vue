@@ -6,26 +6,41 @@
     :columns="columns"
     row-key="pending_transaction_id"
     class="text-capitalize"
-    :filter="filter"
+    :filter="filter || filterCategory"
     :pagination="{
       rowsPerPage: 7,
       sortBy: 'pending_transaction_id',
     }"
   >
     <template v-slot:top>
-       <q-input
-          square
-          outlined
-          dense
-          debounce="300"
-          color="primary"
-          v-model="filter"
-          placeholder="Search..."
-        >
-          <template v-slot:append>
-            <q-icon name="mdi-magnify" />
-          </template>
-        </q-input>
+      <q-input
+        square
+        dense
+        debounce="300"
+        color="primary"
+        v-model="filter"
+        placeholder="Search..."
+      >
+        <template v-slot:append>
+          <q-icon :name="filter ? 'mdi-close-circle' : 'mdi-magnify'" @click="filter = null" class="cursor-pointer" />
+        </template>
+      </q-input>
+
+      <q-btn-dropdown flat no-caps label="Date" dropdown-icon="mdi-chevron-down">
+        <q-list separator style="max-height: 35vh">
+          <q-item clickable v-close-popup @click="filterCategory = ''">
+            <q-item-section>
+              <q-item-label>All</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item v-for="month in categories" :key="month" clickable v-close-popup @click="filterCategory = month">
+            <q-item-section>
+              <q-item-label class="text-capitalize">{{ month }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
     </template>
   </q-table>
 </template>
@@ -38,6 +53,9 @@ import { LocalStorage, debounce } from 'quasar'
 
 const filter = ref('');
 const isLoading = ref(false);
+const categories = ref(['january','febuary','march','april','may','june','july','august','september','november','december']);
+const filterCategory = ref('');
+const rows = ref([]);
 
 const columns = [
   {
@@ -65,6 +83,14 @@ const columns = [
     sortable: true,
   },
   {
+    name: 'department',
+    align: 'center',
+    label: 'Department',
+    field: 'department',
+    sortable: true,
+    style: 'text-transform: uppercase',
+  },
+  {
     name: 'status',
     label: 'Status',
     field: 'status',
@@ -80,7 +106,6 @@ const columns = [
   },
 ];
 
-const rows = ref([]);
 
 const getAllCheckedOutReservation = debounce(async () => {
   try {

@@ -2,28 +2,29 @@
   <q-table
     title="Users List"
     class="text-capitalize"
+    dense
     :rows="rows"
     :columns="columns"
     row-key="name"
-    :filter="filter"
+    :filter="filter || sortTable"
     :loading="isLoading"
     separator="vertical"
     :pagination="{
-      rowsPerPage: 10,
+      rowsPerPage: 20,
       sortBy: 'status',
     }"
   >
     <template v-slot:top>
       <span class="text-h6 q-mr-md">Users List</span>
 
-      <q-btn-dropdown flat no-caps label="Sort by Department" dense>
-        <q-list>
-          <q-item clickable v-close-popup @click="filter = ''">
+      <q-btn-dropdown flat no-caps :label="!sortTable ? 'Sort by Department' : sortTable" dense>
+        <q-list dense>
+          <q-item clickable v-close-popup @click="sortTable = ''">
             <q-item-section>
               ALL
             </q-item-section>
           </q-item>
-          <q-item clickable v-close-popup v-for="option in options" :key="option" @click="filter = option">
+          <q-item clickable v-close-popup v-for="option in options" :key="option" @click="sortTable = option">
             <q-item-section>
               <q-item-label>{{ option }}</q-item-label>
             </q-item-section>
@@ -35,6 +36,7 @@
         <q-input
           placeholder="Search..."
           rounded
+          @blur="filter = null"
           dense
           outlined
           v-model="filter"
@@ -78,6 +80,7 @@ interface UserDetails {
 
 const filter = ref('');
 const isLoading = ref(false);
+const sortTable = ref('');
 const userStore = useUserStore();
 const options = ref([]);
 
@@ -129,7 +132,7 @@ const getAllusers = debounce(() => {
   rows.value = userStore.getUsers;
   rows.value.map((item: unknown) => {
     const index = options.value.indexOf(item.department.toUpperCase());
-    if (index === -1) options.value.push(item.department.toUpperCase())
+    if (index === -1) options.value.push(item.department.toUpperCase());
   });
   isLoading.value = false;
 }, 1500)

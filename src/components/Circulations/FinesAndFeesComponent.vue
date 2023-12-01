@@ -2,29 +2,52 @@
   <q-table
     bordered
     :rows="rows"
+    dense
     :columns="columns"
-    class="text-capitalize"
     row-key="name"
-    :filter="filter"
+    :filter="filter || search"
     :pagination="{
-      rowsPerPage: 7,
+      rowsPerPage: 20,
       sortBy: 'name',
     }"
   >
+    <template v-slot:body-cell-total_fines_and_fees="props">
+      <q-td :key="col" :props="props">
+        {{ addCommas(props.row.total_fines_and_fees) }}
+      </q-td>
+    </template>
+
     <template v-slot:top>
-      <span class="text-h6 text-bold q-pr-md">Fines and Fees</span>
+      <div class="row q-gutter-x-md">
+        <span class="text-h6 text-bold q-pr-md">Fines and Fees</span>
+        <q-btn-dropdown no-caps dense flat label="Department" dropdown-icon="mdi-chevron-down">
+          <q-list>
+            <q-item clickable v-close-popup @click="onItemClick">
+              <q-item-section>
+                <q-item-label>All</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="onItemClick">
+              <q-item-section>
+                <q-item-label>Videos</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="onItemClick">
+              <q-item-section>
+                <q-item-label>Articles</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </div>
       <q-space />
       <div class="row q-gutter-x-md">
-      <q-btn
-        text-color="grey-10"
-        rounded
-        flat
-        label="Remind All"
-        size="md"
-        @click="handleClick(selected)"
-      />
       <q-input
-        borderless
+        outlined
+        rounded
+        dense
         placeholder="Search..."
         v-model="filter"
       >
@@ -46,6 +69,7 @@ defineComponent({
 });
 
 const filter = ref('');
+const search = ref('');
 const selected = ref([]);
 const circulationStore = useCirculationStore();
 
@@ -57,6 +81,7 @@ const columns = [
     align: 'left',
     field: 'fullname',
     sortable: true,
+    style: 'text-transform: capitalize',
   },
   {
     name: 'department',
@@ -64,6 +89,7 @@ const columns = [
     label: 'Department',
     field: 'department',
     sortable: true,
+    style: 'text-transform: uppercase',
   },
   {
     name: 'role',
@@ -71,6 +97,7 @@ const columns = [
     field: 'role',
     align: 'left',
     sortable: true,
+    style: 'text-transform: capitalize',
   },
   {
     name: 'title',
@@ -78,6 +105,7 @@ const columns = [
     field: 'title',
     align: 'left',
     sortable: true,
+    style: 'text-transform: capitalize',
   },
   {
     name: 'due_date',
@@ -85,12 +113,13 @@ const columns = [
     field: 'due_date',
     align: 'left',
     sortable: true,
+    style: 'text-transform: capitalize',
   },
   {
     name: 'total_fines_and_fees',
     label: 'Fine amount',
     field: 'total_fines_and_fees',
-    align: 'left',
+    align: 'center',
     sortable: true,
   },
   {
@@ -99,12 +128,17 @@ const columns = [
     field: 'status',
     align: 'left',
     sortable: true,
+    style: 'text-transform: capitalize',
   },
 ];
 
-const rows = ref([])
+const rows = ref([]);
+const addCommas = (number: number): string => {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
 
 onMounted(() => {
-  rows.value = circulationStore.getFineFess;
+  rows.value = circulationStore.getFinesFees;
+  console.log(circulationStore.getFinesFees);
 });
 </script>

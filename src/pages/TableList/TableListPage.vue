@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mb-xl">
+  <q-page padding class="q-pb-xl">
     <!-- content -->
     <div class="column" style="gap: 25px">
       <UsersTable class="col" />

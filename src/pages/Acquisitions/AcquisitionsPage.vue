@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page padding class="q-pb-xl">
     <!-- content -->
     <q-card>
       <q-tabs

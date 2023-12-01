@@ -8,7 +8,8 @@
 
       <div class="column text-right">
         <span> {{ title }} </span>
-        <span class="text-h5"> {{ count }} </span>
+        <span class="text-h5" v-if="!loading"> {{ formatNumber(count) }} </span>
+        <q-spinner-oval class="self-end q-mt-sm" color="primary" size="1.5em" v-if="loading"/>
       </div>
     </div>
 
@@ -31,6 +32,7 @@ export interface CardsProps {
   img: string;
   label: string;
   count: number;
+  loading: boolean;
 }
 
 withDefaults(defineProps<CardsProps>(), {
@@ -39,5 +41,16 @@ withDefaults(defineProps<CardsProps>(), {
   name: '',
   label: '',
   count: 0,
+  loading: false,
 });
+
+const formatNumber = (total_fees: number) => {
+  if (total_fees < 1000) {
+    return total_fees.toString();
+  } else if (total_fees < 1000000) {
+    return (total_fees / 1000).toFixed(1) + 'k';
+  } else {
+    return (total_fees / 1000000).toFixed(1) + 'M';
+  }
+}
 </script>

@@ -5,10 +5,11 @@
     :rows="rows"
     :columns="columns"
     row-key="pending_transaction_id"
+    dense
     class="text-capitalize"
     :filter="filter"
     :pagination="{
-      rowsPerPage: 7,
+      rowsPerPage: 20,
       sortBy: 'pending_transaction_id',
     }"
   >
@@ -29,11 +30,11 @@
     </template>
     <template v-slot:body-cell-button="{ row, col }">
       <q-td key="button" :props="col.props">
-        <q-icon name="mdi-clipboard-arrow-left" size="2em" class="cursor-pointer" color="positive" @click="handleClick(row.transaction_id)">
+        <q-btn icon="mdi-clipboard-arrow-left" size="15px" flat dense no-caps round :loading="isLoading" color="positive" @click="handleClick(row.transaction_id)">
           <q-tooltip :delay="300" class="bg-grey-10 text-grey-2">
             Mark as returned
           </q-tooltip>
-        </q-icon>
+        </q-btn>
       </q-td>
     </template>
   </q-table>
@@ -73,6 +74,14 @@ const columns = [
     field: 'fullname',
     align: 'left',
     sortable: true,
+  },
+  {
+    name: 'department',
+    align: 'center',
+    label: 'Department',
+    field: 'department',
+    sortable: true,
+    style: 'text-transform: uppercase'
   },
   {
     name: 'transaction_type',
@@ -145,7 +154,7 @@ const returnCirculation = debounce(async(transaction_id: number) => {
       await getAllCheckedOutReservation();
       await socket.emit('notifications', transaction_id);
       Notify.create({
-        message: response.data.message,
+        message: 'Marked as returned',
         position: 'top',
         progress: true,
         type: response.data.status === 200 || 201 ? 'positive' : 'warning',
@@ -155,13 +164,15 @@ const returnCirculation = debounce(async(transaction_id: number) => {
   } catch (error) {
     throw error;
   } finally {
-    isLoading.value = false;
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 1800);
   }
-}, 500)
+}, 1500)
 
 const handleClick = async (transaction_id: number) => {
   try {
-    isLoading.value = false;
+    isLoading.value = true;
     await returnCirculation(transaction_id);
   } catch (error) {
     throw error;

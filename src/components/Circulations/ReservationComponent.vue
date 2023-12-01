@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { defineComponent, watch, ref, onMounted } from 'vue';
-import { debounce, LocalStorage, Notify } from 'quasar';
+import { LocalStorage, Notify } from 'quasar';
 import { useCirculationStore } from 'stores/circulation-store';
 import { ICirculation } from 'src/models/circulations';
 import { api } from 'boot/axios';
@@ -88,6 +88,14 @@ const columns = [
     label: 'Fullname',
     field: 'fullname',
     sortable: true,
+  },
+  {
+    name: 'department',
+    align: 'center',
+    label: 'department',
+    field: 'department',
+    sortable: true,
+    style: 'text-transform: uppercase'
   },
   {
     name: 'transaction_type',

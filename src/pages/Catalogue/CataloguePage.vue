@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page padding class="q-pb-xl">
     <!-- content -->
     <q-tabs v-model="tab" align="justify" class="q-mb-md">
       <q-tab class="text-grey-7" name="booksubj" label="Book Subject" />

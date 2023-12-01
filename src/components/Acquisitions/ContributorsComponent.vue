@@ -31,6 +31,8 @@
             size="12px"
             flat
             dense
+            :loading="isLoading"
+            color="red-5"
             round
             icon="mdi-delete"
             @click="manageUserContributions('remove', user_id, 'removed', contribution_id)"
@@ -42,6 +44,8 @@
             size="12px"
             flat
             dense
+            :loading="isLoading"
+            color="green-5"
             round
             icon="mdi-check-all"
             @click="manageUserContributions('accept', user_id, 'accepted', contribution_id)"
@@ -52,6 +56,8 @@
             icon="mdi-cancel"
             size="12px"
             flat
+            :loading="isLoading"
+            color="yellow-10"
             dense
             round
             @click="manageUserContributions('cancel', user_id, 'cancelled', contribution_id)"
@@ -71,8 +77,10 @@ import { format, Notify, LocalStorage, debounce } from 'quasar';
 import { linkfile } from 'src/utils/links';
 import { api } from 'src/boot/axios';
 import { socket } from 'src/utils/socket';
+import { ref } from 'vue';
 
 const emit = defineEmits(['actionPerformed']);
+const isLoading = ref(false);
 
 export interface ContributorsProps {
   contribution_id: number;
@@ -126,6 +134,7 @@ const handleContributions = debounce(async (action: string, user_id: number, p_s
       });
       emit('actionPerformed', { action, user_id, p_status, contribution_id });
       socket.emit('notifications', user_id);
+      isLoading.value = false;
     }
   } catch (error) {
     throw error;
@@ -134,6 +143,7 @@ const handleContributions = debounce(async (action: string, user_id: number, p_s
 
 const manageUserContributions = async (action: string, user_id: number, p_status: string, contribution_id: number) => {
   try {
+    isLoading.value = true;
     await handleContributions(action,user_id,p_status,contribution_id);
   } catch (error) {
     throw error;

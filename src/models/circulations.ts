@@ -3,6 +3,7 @@ interface ICirculation {
   user_id: number;
   title: string;
   fullname: string;
+  department: string;
   transaction_type: string;
   status: string;
   request_date: string;
@@ -27,6 +28,7 @@ interface IRenewal {
   transaction_id: number;
   user_id: number;
   fullname: string;
+  department: string;
   title: string;
   renewal_days: string;
   original_due_date: string;

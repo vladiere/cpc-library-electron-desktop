@@ -14,35 +14,58 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 
 defineComponent({
   name: 'RecentVisitChart',
 });
 
-const series = [44, 55, 13, 43];
-const chartOptions = {
-  chart: {
-    width: 450,
-    type: 'pie',
-  },
-  title: {
-    text: 'Department online the most',
-    align: 'left',
-  },
-  labels: ['BSIT', 'BSHM', 'BSED', 'BEED'],
-  responsive: [
-    {
-      breakpoint: 480,
-      options: {
-        chart: {
-          width: 300,
-        },
-        legend: {
-          position: 'bottom',
+interface DataObjectProperties {
+  department: string;
+  online: number;
+}
+
+interface DataObject {
+  data_object: DataObjectProperties[];
+}
+
+const props = withDefaults(defineProps<DataObject>(), {
+  data_object: [] as Array<DataObject>,
+});
+
+const series = ref([]);
+const labels = ref([]);
+const chartOptions = ref({});
+
+onMounted(() => {
+  props.data_object.map((item) => {
+    series.value.push(item?.online)
+    labels.value.push(item.department.toUpperCase())
+  });
+
+  chartOptions.value = {
+    chart: {
+      width: 450,
+      type: 'pie',
+    },
+    title: {
+      text: 'Departmental online',
+      align: 'center',
+    },
+    labels: labels.value,
+    responsive: [
+      {
+        breakpoint: 480,
+        options: {
+          chart: {
+            width: 300,
+          },
+          legend: {
+            position: 'bottom',
+          },
         },
       },
-    },
-  ],
-};
+    ],
+  }
+})
 </script>

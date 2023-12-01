@@ -60,10 +60,9 @@
 <script setup lang="ts">
 import { defineComponent, ref, onMounted, watch } from 'vue';
 import { useCirculationStore } from 'stores/circulation-store';
-import circulations from 'src/utils/circulations';
 import { ICirculation } from 'src/models/circulations';
 import { api } from 'boot/axios';
-import { LocalStorage, Notify, debounce } from 'quasar';
+import { LocalStorage, Notify, } from 'quasar';
 
 defineComponent({
   name: 'ReservationComponent',
@@ -91,6 +90,14 @@ const columns = [
     sortable: true,
   },
   {
+    name: 'department',
+    align: 'center',
+    label: 'Department',
+    field: 'department',
+    sortable: true,
+    style: 'text-transform: uppercase'
+  },
+  {
     name: 'transaction_type',
     label: 'Transaction Type',
     field: 'transaction_type',
@@ -106,12 +113,6 @@ const columns = [
     name: 'request_date',
     label: 'Request Date',
     field: 'request_date',
-    sortable: true,
-  },
-  {
-    name: 'approve_date',
-    label: 'Approve Date',
-    field: 'approve_date',
     sortable: true,
   },
 ];

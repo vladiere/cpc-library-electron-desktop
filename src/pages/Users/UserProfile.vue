@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mb-lg">
+  <q-page padding class="q-pb-lg">
     <div class="column">
       <div class="row" style="gap: 25px">
         <div

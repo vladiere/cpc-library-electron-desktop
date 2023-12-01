@@ -1,6 +1,5 @@
 import { boot } from 'quasar/wrappers';
 import axios, { AxiosInstance } from 'axios';
-import jwt_decode from 'jwt-decode';
 import { LocalStorage } from 'quasar';
 
 declare module '@vue/runtime-core' {
@@ -32,29 +31,52 @@ const refreshToken = async () => {
       refreshToken: LocalStorage.getItem('refresh'),
     });
 
-    return response.data[0];
+    return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-// Add a request interceptors
 api.interceptors.request.use(
-  async (config) => {
-    const currentDate = new Date();
-
-    const decodedToken: unknown = jwt_decode(
-      LocalStorage.getItem('token'),
-    );
-    if (decodedToken.exp * 1000 < currentDate.getTime()) {
-      const data = await refreshToken();
-      config.headers['Authorization'] = `Bearer ${data.accessToken}`;
+  config => {
+    if (!config.headers['Authorization']) {
+       config.headers['Authorization'] = `Bearer ${LocalStorage.getItem('token')}`;
     }
 
     return config;
-  },
-  (error) => Promise.reject(error),
+  }, (error) => Promise.reject(error)
+)
+
+
+api.interceptors.response.use(
+  response => response,
+  async (error) => {
+    const prevRequest = error?.config;
+
+    if (error?.response.status === 401 && !prevRequest?.sent) {
+      // console.log('Unauthorized error. Attempting to refresh token.');
+      prevRequest.sent = true;
+      const token = await refreshToken();
+      // console.log('Refresh token response:', token);
+
+      if (token.accessToken) {
+        // console.log('Token refreshed successfully. Retrying the previous request.');
+        prevRequest.headers['Authorization'] = `Bearer ${token.accessToken}`;
+
+        LocalStorage.set('token', token.accessToken);
+        return api(prevRequest);
+      } else {
+        // console.error('Failed to refresh token. Redirect to login or handle accordingly.');
+        // Handle the case where token refresh fails (e.g., redirect to login)
+        return Promise.reject(error);
+      }
+    }
+
+    return Promise.reject(error);
+  }
 );
+
+
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api

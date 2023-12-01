@@ -15,7 +15,7 @@ export const useCirculationStore = defineStore('circulation', {
   getters: {
     getReservations: (state) => state.reservations,
     getHolds: (state) => state.holds,
-    getFineFess: (state) => state.finefees,
+    getFinesFees: (state) => state.finefees,
     getBorrows: (state) => state.borrows,
     getRenewals: (state) => state.renewals,
     getAllRenewals: (state) => state.all_renewals,
@@ -34,7 +34,7 @@ export const useCirculationStore = defineStore('circulation', {
     initCirculations (data) {
       this.reservations = data.reserved;
       this.holds = data.held;
-      this.finefees = data.finefess;
+      this.finefees = data.finefees;
       this.borrows = data.borrowed;
       this.renewals = data.renewal;
       this.all_renewals = data.all_renewals;

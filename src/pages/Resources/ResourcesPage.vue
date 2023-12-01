@@ -1,5 +1,5 @@
 <template>
-  <q-page padding class="q-mb-xl">
+  <q-page padding class="q-pb-xl">
     <!-- content -->
     <q-tabs v-model="tab" align="justify" narrow-indicator>
       <q-tab class="text-grey-8" name="add" label="Add Resources" />

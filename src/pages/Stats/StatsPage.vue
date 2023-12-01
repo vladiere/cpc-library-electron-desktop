@@ -1,33 +1,39 @@
 <template>
   <q-page padding class="q-mb-lg">
-     <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="transparent"
-        align="justify"
-      >
-        <q-tab name="yearly" label="Yearly" />
-        <q-tab name="monthly" label="Monthly" />
-        <q-tab name="weekly" label="Weekly" />
-      </q-tabs>
     <div class="q-mt-sm column q-gutter-lg">
       <BooksTrend />
       <RecentVisits />
-      <OnlineUsersVue />
+      <FinesAndFees />
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
-import RecentVisits from 'src/components/Statistics/RecentVisitStat.vue';
-import BooksTrend from 'src/components/Statistics/BooksTrendStat.vue';
-import OnlineUsersVue from 'src/components/Statistics/OnlineUsers.vue';
+import { defineComponent, defineAsyncComponent, ref } from 'vue';
 
 defineComponent({
   name: 'StatsPage',
+});
+
+const RecentVisits = defineAsyncComponent({
+  loader: () => import('components/Statistics/RecentVisitStat.vue'),
+  timeout: 5000,
+  delay: 300,
+  suspensible: false
+});
+
+const BooksTrend = defineAsyncComponent({
+  loader: () => import('components/Statistics/BooksTrendStat.vue'),
+  delay: 300,
+  timeout: 5000,
+  suspensible: false
+});
+
+const FinesAndFees = defineAsyncComponent({
+  loader: () => import('components/Statistics/FinesAndFees.vue'),
+  delay: 300,
+  timeout: 5000,
+  suspensible: false
 });
 
 const tab = ref('yearly');

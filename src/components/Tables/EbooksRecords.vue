@@ -5,12 +5,13 @@
     :rows="rows"
     :columns="columns"
     row-key="name"
+    dense
     :filter="filter"
     separator="vertical"
     class="text-capitalize q-pa-md"
     style="max-width: 100%"
     :pagination="{
-      rowsPerPage: 10,
+      rowsPerPage: 20,
       sortBy: 'name',
     }"
   >

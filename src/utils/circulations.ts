@@ -6,14 +6,12 @@ const circulationStore = useCirculationStore();
 
 const getCirculations = async () => {
   try {
-    if (circulationStore.isEmpty) {
       const response = await api.get('/transactions/all', {
         headers: {
           Authorization: `Bearer ${LocalStorage.getItem('token')}`
         }
       });
       circulationStore.initCirculations(response.data);
-    }
   } catch (error) {
     throw error;
   }

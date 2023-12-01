@@ -4,11 +4,12 @@
     :loading="isLoading"
     :rows="rows"
     :columns="columns"
+    dense
     row-key="pending_transaction_id"
     class="text-capitalize"
     :filter="filter"
     :pagination="{
-      rowsPerPage: 7,
+      rowsPerPage: 20,
       sortBy: 'pending_transaction_id',
     }"
   >
@@ -29,16 +30,16 @@
     </template>
     <template v-slot:body-cell-button="{ row, col }">
       <q-td key="button" :props="col.props">
-        <q-icon name="shopping_cart_checkout" size="2em" class="cursor-pointer" color="positive" @click="handleClick(row.transaction_id, 'Active')">
+        <q-btn icon="shopping_cart_checkout" :loading="isLoading" flat no-caps dense round size="15px" color="positive" @click="handleClick(row.transaction_id, 'Active')">
           <q-tooltip :delay="300" class="bg-grey-10 text-grey-2">
             Checked Out
           </q-tooltip>
-        </q-icon>
-        <q-icon name="mdi-cancel" size="2em" class="cursor-pointer" color="negative" @click="handleClick(row.transaction_id, 'Cancelled')">
+        </q-btn>
+        <q-btn icon="mdi-cancel" :loading="isLoading" flat no-caps dense round size="15px" color="negative" @click="handleClick(row.transaction_id, 'Cancelled')">
           <q-tooltip :delay="300" class="bg-grey-10 text-grey-2">
             Cancel
           </q-tooltip>
-        </q-icon>
+        </q-btn>
       </q-td>
     </template>
   </q-table>
@@ -78,6 +79,14 @@ const columns = [
     field: 'fullname',
     align: 'left',
     sortable: true,
+  },
+  {
+    name: 'department',
+    align: 'center',
+    label: 'Department',
+    field: 'department',
+    sortable: true,
+    style: 'text-transform: uppercase',
   },
   {
     name: 'transaction_type',
@@ -134,7 +143,9 @@ const getAllApprovedReservation = debounce(async () => {
   } catch (error) {
     throw error;
   } finally {
-    isLoading.value = false;
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 1800);
   }
 }, 1500);
 

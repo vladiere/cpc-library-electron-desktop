@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page padding class="q-pb-xl">
       <q-tabs
         v-model="tab"
         dense
@@ -10,7 +10,7 @@
       >
         <q-tab name="checkedout" label="Checked Out" />
         <q-tab name="return" label="Return" />
-        <q-tab name="history" label="History" />
+        <q-tab name="holdrecords" label="Hold records" />
       </q-tabs>
 
       <q-separator />

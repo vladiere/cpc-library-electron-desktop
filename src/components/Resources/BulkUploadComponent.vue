@@ -6,7 +6,7 @@
     dense
     :pagination="{
       sortBy: 'name',
-      rowsPerPage: 10,
+      rowsPerPage: 20,
     }"
     :columns="columns"
     row-key="name"
