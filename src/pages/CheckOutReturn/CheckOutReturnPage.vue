@@ -22,6 +22,9 @@
         <q-tab-panel name="return" class="q-pa-none">
           <ReturnComponent />
         </q-tab-panel>
+        <q-tab-panel name="holdrecords" class="q-pa-none">
+          <HoldRecordsComponent />
+        </q-tab-panel>
       </q-tab-panels>
   </q-page>
 </template>
@@ -42,6 +45,13 @@ const CheckedOutComponent = defineAsyncComponent({
 
 const ReturnComponent = defineAsyncComponent({
   loader: () => import('components/CheckedInOut/ReturnComponent.vue'),
+  delay: 300,
+  timeout: 2300,
+  suspensible: false
+});
+
+const HoldRecordsComponent = defineAsyncComponent({
+  loader: () => import('components/CheckedInOut/HoldRecordsComponent.vue'),
   delay: 300,
   timeout: 2300,
   suspensible: false

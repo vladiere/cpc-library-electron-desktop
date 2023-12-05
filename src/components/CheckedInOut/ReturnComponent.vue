@@ -38,6 +38,32 @@
       </q-td>
     </template>
   </q-table>
+
+  <q-dialog v-model="showDialog" persistent>
+    <q-card style="min-width: 350px">
+      <q-card-section>
+        <div class="text-h6">Select fee categories</div>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-select
+          dense
+          borderless
+          v-model="model"
+          :options="options"
+          options-cover
+          label="fee options"
+          lazy-rules
+          :error="errorOption.error"
+          :error-message="errorOption.message"
+        />
+      </q-card-section>
+      <q-card-actions align="right" class="text-primary">
+        <q-btn flat :loading="isLoading" label="Cancel" v-close-popup />
+        <q-btn flat :loading="isLoading" label="Return" @click="handleSendClick"/>
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 
@@ -49,6 +75,15 @@ import { socket } from 'src/utils/socket';
 
 const filter = ref('');
 const isLoading = ref(false);
+const options = ref(['Late Return Fee','Damaged Book Fee','Lost Book Fee','No issue','Other']);
+const showDialog = ref(false);
+const rows = ref([]);
+const model = ref('');
+const temp = ref(null);
+const errorOption = ref({
+  error: false,
+  message: ''
+})
 
 const columns = [
   {
@@ -119,7 +154,6 @@ const columns = [
   },
 ];
 
-const rows = ref([]);
 
 const getAllCheckedOutReservation = debounce(async () => {
   try {
@@ -144,7 +178,7 @@ const getAllCheckedOutReservation = debounce(async () => {
 
 const returnCirculation = debounce(async(transaction_id: number) => {
   try {
-     const response = await api.post('/transaction/book/check_return', { transaction_id: transaction_id, transaction_type: 'Returned', transaction_status: 'Completed' }, {
+     const response = await api.post('/transaction/book/check_return', { transaction_id: transaction_id, transaction_type: 'Returned', transaction_status: 'Completed', fee: model.value }, {
       headers: {
         Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
@@ -152,6 +186,9 @@ const returnCirculation = debounce(async(transaction_id: number) => {
 
     if (response.status === 200) {
       await getAllCheckedOutReservation();
+      temp.value = null;
+      model.value = '';
+      showDialog.value = false;
       await socket.emit('notifications', transaction_id);
       Notify.create({
         message: 'Marked as returned',
@@ -172,8 +209,22 @@ const returnCirculation = debounce(async(transaction_id: number) => {
 
 const handleClick = async (transaction_id: number) => {
   try {
-    isLoading.value = true;
-    await returnCirculation(transaction_id);
+    showDialog.value = true;
+    temp.value = transaction_id;
+  } catch (error) {
+    throw error;
+  }
+}
+
+const handleSendClick = async() => {
+  try {
+    if (model.value !== '') {
+      isLoading.value = true;
+      await returnCirculation(temp.value);
+    } else {
+      errorOption.value.error = true;
+      errorOption.value.message = 'Select fee option';
+    }
   } catch (error) {
     throw error;
   }

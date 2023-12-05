@@ -23,28 +23,44 @@
               flat
               rounded
               dense
+              :loading="loading"
               :dropdown-icon="unReadCounts > 0 ? 'mdi-bell-ring' : 'mdi-bell-outline'"
               :color="unReadCounts > 0 ? 'warning' : undefined"
               no-icon-animation
+              menu-anchor="center left"
             >
-              <q-virtual-scroll
-                style="max-height: 300px; overflow-x: hidden; max-width: 450px"
-                :items="notifications"
-                separator
-                v-slot="{ item, index }"
-              >
-                <ListNotifications :key="index" v-bind="item" />
-              </q-virtual-scroll>
+              <q-list separator style="max-height: 300px; overflow-x: hidden; max-width: 450px">
+                <q-item dense v-if="notifications.length > 0" >
+
+                  <q-item-section>
+                    <q-spinner-tail
+                      v-if="false"
+                      color="primary"
+                      size="2em"
+                    />
+                  </q-item-section>
+
+                  <q-item-section side>
+                    <q-icon v-if="!loading" name="mdi-broom" size="2em" color="blue-9" class="cursor-pointer" @click="readAllNotifications">
+                      <q-tooltip class="bg-grey-10 text-grey-2" :delay="300">
+                        Read all
+                      </q-tooltip>
+                    </q-icon>
+                    <q-spinner-tail
+                      v-else
+                      color="primary"
+                      size="2em"
+                    />
+                  </q-item-section>
+               </q-item>
+
+                <ListNotifications class="text-capitalize" v-for="item in notifications" :key="item" v-bind="item" />
+
                 <div v-if="notifications.length === 0" class="column items-center q-pa-md text-grey-7">
                   Empty notifications
                 </div>
-                <div v-if="notifications.length > 0" class="column absolute-bottom-right q-mr-md q-mb-sm">
-                  <q-icon name="mdi-broom" size="2em" color="blue-9" class="cursor-pointer" @click="readAllNotifications">
-                    <q-tooltip class="bg-grey-10 text-grey-2" :delay="300">
-                     Read all
-                    </q-tooltip>
-                  </q-icon>
-                </div>
+
+              </q-list>
             </q-btn-dropdown>
           </div>
           <div class="row items-center q-gutter-x-xs cursor-pointer">
@@ -115,7 +131,7 @@ import EssentialLink, {
 import { useRoute } from 'vue-router';
 import appLogo from 'src/assets/applogo.png';
 import { api } from 'src/boot/axios';
-import { LocalStorage } from 'quasar';
+import { LocalStorage, debounce } from 'quasar';
 import ListNotifications, {
   NotificationsProps,
 } from 'src/components/Notify/ListNotifications.vue';
@@ -125,7 +141,7 @@ import books from 'src/utils/books';
 
 const route = useRoute();
 const routeName = ref<unknown>('');
-const loading = ref(true);
+const loading = ref(false);
 const miniState = ref(true);
 
 const essentialLinks = ref<EssentialLinkProps>([
@@ -234,8 +250,7 @@ const librarianNotifications = async () => {
   }
 }
 
-
-const readAllNotifications = async () => {
+const sendReadAllNotifications = debounce(async() => {
   try {
     await api.get('/notifications/clear', {
       headers: {
@@ -246,11 +261,23 @@ const readAllNotifications = async () => {
     unReadCounts.value = 0;
   } catch (error) {
     throw error;
+  } finally {
+    loading.value = false;
+  }
+},1500)
+
+const readAllNotifications = async () => {
+  try {
+    loading.value = true;
+    await sendReadAllNotifications();
+  } catch (error) {
+    throw error;
   }
 }
 
 
 onMounted(async () => {
+  loading.value = true;
   await books.getAllContributorsBooks();
   await checkLibrarianIsAdmin();
   await librarianNotifications();
@@ -261,6 +288,7 @@ onMounted(async () => {
     }
   })
   routeName.value = route.name;
+  loading.value = false;
 });
 
 watchEffect(() => {

@@ -65,12 +65,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { loginApi } from 'src/boot/axios';
 import { LocalStorage, debounce, Notify } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useLibrarianDataStore } from 'stores/user';
 import LoadingComponent from 'components/Loaders/LoadingComponent.vue';
+import { socket } from 'src/utils/socket';
 
 defineComponent({
   name: 'LoginPage',
@@ -130,4 +131,10 @@ const handleSubmit = async () => {
     console.error(error);
    }
 };
+
+onMounted(() => {
+  socket.on(connect => {
+    console.log('connected')
+  })
+})
 </script>

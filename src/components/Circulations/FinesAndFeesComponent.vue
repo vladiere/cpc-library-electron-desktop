@@ -5,40 +5,59 @@
     dense
     :columns="columns"
     row-key="name"
-    :filter="filter || search"
+    :filter="filter || search || fees"
     :pagination="{
       rowsPerPage: 20,
       sortBy: 'name',
     }"
   >
     <template v-slot:body-cell-total_fines_and_fees="props">
-      <q-td :key="col" :props="props">
+      <q-td :key="props" :props="props">
         {{ addCommas(props.row.total_fines_and_fees) }}
+      </q-td>
+    </template>
+
+    <template v-slot:body-cell-fine_type="props">
+      <q-td :key="props" :props="props">
+        {{ props.row.fine_type === 'Other' ? 'Not yet' : props.row.fine_type }}
       </q-td>
     </template>
 
     <template v-slot:top>
       <div class="row q-gutter-x-md">
         <span class="text-h6 text-bold q-pr-md">Fines and Fees</span>
+
         <q-btn-dropdown no-caps dense flat label="Department" dropdown-icon="mdi-chevron-down">
-          <q-list>
-            <q-item clickable v-close-popup @click="onItemClick">
+          <q-list dense separator>
+            <q-item clickable v-close-popup @click="search = ''">
               <q-item-section>
                 <q-item-label>All</q-item-label>
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-close-popup @click="onItemClick">
+            <q-item v-for="item in departments" :key="item" clickable v-close-popup @click="search = item">
               <q-item-section>
-                <q-item-label>Videos</q-item-label>
+                <q-item-label class="text-uppercase">{{ item }}</q-item-label>
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-close-popup @click="onItemClick">
+          </q-list>
+        </q-btn-dropdown>
+
+        <q-btn-dropdown no-caps dense flat label="Fee type" dropdown-icon="mdi-chevron-down">
+          <q-list dense separator>
+            <q-item clickable v-close-popup @click="fees = ''">
               <q-item-section>
-                <q-item-label>Articles</q-item-label>
+                <q-item-label>All</q-item-label>
               </q-item-section>
             </q-item>
+
+            <q-item v-for="item in feeTypes" :key="item" clickable v-close-popup @click="fees = item">
+              <q-item-section>
+                <q-item-label class="text-uppercase">{{ item }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
           </q-list>
         </q-btn-dropdown>
       </div>
@@ -48,11 +67,12 @@
         outlined
         rounded
         dense
+        @blur="filter = ''"
         placeholder="Search..."
         v-model="filter"
       >
-        <template v-slot:after>
-          <q-icon name="mdi-magnify"/>
+        <template v-slot:append>
+          <q-icon :name="filter === '' ? 'mdi-magnify' : 'mdi-close-circle'" class="cursor-pointer" @click="filter = ''"/>
         </template>
       </q-input>
       </div>
@@ -72,6 +92,9 @@ const filter = ref('');
 const search = ref('');
 const selected = ref([]);
 const circulationStore = useCirculationStore();
+const departments = ref([]);
+const feeTypes = ref([]);
+const fees = ref('')
 
 const columns = [
   {
@@ -123,6 +146,14 @@ const columns = [
     sortable: true,
   },
   {
+    name: 'fine_type',
+    label: 'Fee type',
+    field: 'fine_type',
+    align: 'left',
+    sortable: true,
+    style: 'text-transform: capitalize',
+  },
+  {
     name: 'status',
     label: 'Status',
     field: 'status',
@@ -139,6 +170,14 @@ const addCommas = (number: number): string => {
 
 onMounted(() => {
   rows.value = circulationStore.getFinesFees;
-  console.log(circulationStore.getFinesFees);
+
+  rows.value.map((item) => {
+    const index = departments.value.indexOf(item.department);
+    if (index === -1) departments.value.push(item.department);
+
+    const newIndex = feeTypes.value.indexOf(item.fine_type);
+    if (newIndex === -1) feeTypes.value.push(item.fine_type);
+
+  })
 });
 </script>

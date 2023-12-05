@@ -130,7 +130,7 @@ const getAllApprovedReservation = debounce(async () => {
   try {
       const response = await api.post('/transaction/book/all', {
         option: 'Checked Out',
-        transaction_status: 'Completed'
+        transaction_status: 'Completed',
       }, {
         headers: {
           Authorization: `Bearer ${LocalStorage.getItem('token')}`
@@ -151,7 +151,7 @@ const getAllApprovedReservation = debounce(async () => {
 
 const checkoutCirculation = debounce(async (transaction_id: number, option: string) => {
   try {
-    const response = await api.post('/transaction/book/check_return', { transaction_id: transaction_id, transaction_type: 'Checked Out', transaction_status: option }, {
+    const response = await api.post('/transaction/book/check_return', { transaction_id: transaction_id, transaction_type: 'Checked Out', transaction_status: option, fee: 'Other' }, {
       headers: {
         Authorization: `Bearer ${LocalStorage.getItem('token')}`
       }
@@ -161,12 +161,23 @@ const checkoutCirculation = debounce(async (transaction_id: number, option: stri
       await getAllApprovedReservation();
       await socket.emit('notifications', transaction_id);
 
-      Notify.create({
-        message: response.data.message,
-        position: 'top',
-        type: response.data.status === 200 || 201 ? 'positive' : 'warning',
-        timeout: 2300,
-      });
+      if (response.data.status === 200 | 201) {
+        Notify.create({
+          message: 'Mark as checked out',
+          position: 'top',
+          progress: true,
+          type: 'positive',
+          timeout: 2300,
+        });
+      } else {
+        Notify.create({
+          message: response.data.message,
+          position: 'top',
+          progress: true,
+          type: 'warning',
+          timeout: 2300,
+        });
+      }
     }
   } catch (error) {
     throw error;

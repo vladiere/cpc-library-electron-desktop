@@ -1,8 +1,8 @@
 <template>
-  <div id="chart" class="shadow-2 q-pa-md">
+  <div id="chart" class="shadow-2 q-pa-md text-capitalize">
     <apexchart
       type="bar"
-      height="350"
+      height="450"
       :options="chartOptions"
       :series="series"
     ></apexchart>
@@ -10,30 +10,28 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
+
 defineComponent({
   name: 'BooksTrendStat',
 });
 
-const series = [
-  {
-    name: 'The anonymous',
-    data: [44, 55, 57, 56, 61, 58, 63, 60, 66],
-  },
-  {
-    name: 'The Revenue',
-    data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
-  },
-  {
-    name: 'Free Cash Flow On River',
-    data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
-  },
-];
+type ObjectData = {
+  data_object: object;
+}
+
+const props = withDefaults(defineProps<ObjectData>(), {
+  data_object: [] as Array<ObjectData>,
+});
+
+
+const categories = ref([]);
+const series = ref<object>([]);
 
 const chartOptions = {
   chart: {
     type: 'bar',
-    height: 350,
+    height: 450,
   },
   plotOptions: {
     bar: {
@@ -51,7 +49,7 @@ const chartOptions = {
     colors: ['transparent'],
   },
   xaxis: {
-    categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+    categories: categories.value,
   },
   title: {
     text: 'Popular borrowed books',
@@ -67,4 +65,31 @@ const chartOptions = {
     },
   },
 };
+
+onMounted(() => {
+
+  props.data_object.map((item) => {
+    const index = categories.value.indexOf(item.month.slice(0, 3));
+    if (index === -1) categories.value.push(item.month.slice(0, 3));
+  });
+
+
+  props.data_object.forEach((item) => {
+    if (series.value.length > 0) {
+      const existingData = series.value.find((data) => data.name === item.title);
+
+      if (existingData) {
+        // If the series with the same title exists, add another total record
+        existingData.data.push(item.total_records);
+      } else {
+        // If the series with the same title doesn't exist, add a new series
+        series.value.push({ name: item.title, data: [item.total_records] });
+      }
+    } else {
+      // If series is empty, add a new series
+      series.value.push({ name: item.title, data: [item.total_records] });
+    }
+  });
+
+});
 </script>

@@ -10,30 +10,22 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 
 defineComponent({
   name: 'BooksTrend',
 });
 
-const series = [
-  {
-    name: 'BSIT',
-    data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
-  },
-  {
-    name: 'BSHM',
-    data: [76, 85, 101, 98, 87, 105, 91, 114, 94],
-  },
-  {
-    name: 'BSED',
-    data: [35, 41, 36, 26, 45, 48, 52, 53, 41],
-  },
-  {
-    name: 'BEED',
-    data: [23, 32, 14, 20, 34, 40, 19, 25, 10],
-  },
-];
+type ObjectData = {
+  data_object: object;
+}
+
+const props = withDefaults(defineProps<ObjectData>(), {
+  data_object: [] as Array<ObjectData>,
+});
+
+const categories = ref([]);
+const series = ref([]);
 
 const chartOptions = {
   chart: {
@@ -50,7 +42,7 @@ const chartOptions = {
     curve: 'straight',
   },
   title: {
-    text: 'Product Trends by Month',
+    text: 'Most department online',
     align: 'left',
   },
   grid: {
@@ -60,7 +52,32 @@ const chartOptions = {
     },
   },
   xaxis: {
-    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+    categories: categories.value,
   },
 };
+
+onMounted(() => {
+  props.data_object.map((item) => {
+    const index = categories.value.indexOf(item.month.slice(0,3));
+    if (index === -1) categories.value.push(item.month.slice(0,3));
+  });
+
+  props.data_object.forEach((item) => {
+    if (series.value.length > 0) {
+      const existingData = series.value.find((data) => data.name === item.department.toUpperCase());
+
+      if (existingData) {
+        // If the series with the same title exists, add another total record
+        existingData.data.push(item.total_counts);
+      } else {
+        // If the series with the same title doesn't exist, add a new series
+        series.value.push({ name: item.department.toUpperCase(), data: [item.total_counts] });
+      }
+    } else {
+      // If series is empty, add a new series
+      series.value.push({ name: item.department.toUpperCase(), data: [item.total_counts] });
+    }
+  });
+
+})
 </script>

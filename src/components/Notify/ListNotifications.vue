@@ -1,5 +1,4 @@
 <template>
-  <q-list class="text-capitalize">
     <q-item clickable v-ripple :class="status === 'unread' ? 'text-bold' : ''">
       <q-item-section>
         <q-item-label :class="status ==='unread' ? 'text-grey-10' : 'text-grey-8'">{{ fullname }}</q-item-label>
@@ -10,9 +9,6 @@
         <q-item-label caption>{{ notification_date }}</q-item-label>
       </q-item-section>
     </q-item>
-
-    <q-separator inset />
-  </q-list>
 </template>
 
 <script setup lang="ts">
