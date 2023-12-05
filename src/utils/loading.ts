@@ -25,7 +25,7 @@ export const SpinnerHourglass = (loading_state: boolean, message?: string) => {
     Loading.show({
       message: message,
       spinner: QSpinnerHourglass,
-      spinnerColor: 'light-green',
+      spinnerColor: 'blue-9',
       spinnerSize: 120,
       backgroundColor: 'grey-10',
       messageColor: 'grey-11',

@@ -5,7 +5,7 @@
       <div class="col column relative-position">
         <q-img
           :src="defaultImage"
-          :style="!hasImage ? 'max-height: 470px' : 'max-height: 470px; opacity: 0.7'"
+          :style="book_record.img_path ? 'max-height: 470px' : 'max-height: 470px; opacity: 0.7'"
           fit="fill"
         />
         <q-btn
@@ -19,9 +19,6 @@
             >Change Book Image</q-tooltip
           >
         </q-btn>
-        <div v-if="hasImage" class="absolute-center column q-gutter-y-md">
-          <span class="col text-grey-10 text-h3 text-bold">No Image</span>
-        </div>
       </div>
       <div class="col column q-gutter-y-md q-px-md text-capitalize">
         <div class="row q-gutter-x-md">
@@ -74,8 +71,9 @@
       transition-hide="scale"
     >
       <q-card class="bg-grey-2 text-grey-10">
-        <q-card-section class="column items-center" style="max-width: 350px">
+        <q-card-section class="column justify-center" style="width: 400px">
           <q-file
+            class="col"
             filled
             outlined
             v-model="fileData"
@@ -97,7 +95,7 @@
             v-if="fileData"
             :src="imagePreview"
             fit="fill"
-            style="max-height: 390px"
+            style="width: 100%"
           />
         </q-card-section>
         <q-card-section class="row reverse q-gutter-x-md">
@@ -105,6 +103,7 @@
             label="Upload"
             color="primary"
             dense
+            :loading="loading"
             no-caps
             padding="2px 8px"
             rounded
@@ -114,6 +113,7 @@
             label="Close"
             flat
             dense
+            :loading="loading"
             v-close-popup
             no-caps
             @click="fileData = null"
@@ -129,6 +129,7 @@ import { LocalStorage, Notify } from 'quasar';
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
+import { linkimg } from 'src/utils/links';
 
 defineComponent({
   name: 'EditRecordPage',
@@ -139,7 +140,6 @@ const book_record = ref<any>([]);
 const showDialog = ref(false);
 const fileData = ref(null);
 const defaultImage = ref<any>('');
-const imgUrl = 'http://localhost:3000/images/';
 const onSucess = ref(false);
 const hasImage = ref(true);
 
@@ -225,10 +225,9 @@ onMounted( async () => {
     book_record.value.img_path === null
   ) {
     defaultImage.value =
-      'https://picsum.photos/id/444/1200/1200?grayscale&blur=3';
+      'src/assets/no-image-available.png';
   } else {
-    hasImage.value = false;
-    defaultImage.value = imgUrl + book_record.value.img_path;
+    defaultImage.value = linkimg + book_record.value.img_path;
   }
 
 });

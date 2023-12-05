@@ -49,6 +49,7 @@
 import { onMounted, ref } from 'vue';
 import { api } from 'src/boot/axios';
 import { Notify, LocalStorage } from 'quasar';
+import { SpinnerHourglass } from 'src/utils/loading';
 
 export interface BulkUploadProps {
   data: object;
@@ -146,6 +147,7 @@ const columns: unknown = ref([
 
 const handleClick = async () => {
   loading.value = true;
+  SpinnerHourglass(true, 'Uploading records...\nThis may take a while.');
 
   try {
     const response = await api.post(
@@ -171,6 +173,7 @@ const handleClick = async () => {
 
     onSuccess.value = true;
     loading.value = false;
+    SpinnerHourglass(false);
   } catch (error: unknown) {
     throw new Error(error.message);
   }
