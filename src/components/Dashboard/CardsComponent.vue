@@ -8,7 +8,7 @@
 
       <div class="column text-right">
         <span> {{ title }} </span>
-        <span class="text-h5" v-if="!loading"> {{ formatNumber(count) }} </span>
+        <span class="text-h5" v-if="!loading"> {{ count ? formatNumber(count) : 0 }} </span>
         <q-spinner-oval class="self-end q-mt-sm" color="primary" size="1.5em" v-if="loading"/>
       </div>
     </div>

@@ -83,7 +83,7 @@ const cardsComponent = ref<CardsProps[]>([
     icon: 'mdi-cached',
     img: 'mdi-currency-php',
     label: 'Updated now',
-    count: computed(() => cards_value.value.totalAmount),
+    count: computed(() => cards_value.value.totalAmount) | 0,
     loading: isLoading,
   },
   {
