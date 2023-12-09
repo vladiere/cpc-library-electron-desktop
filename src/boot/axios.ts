@@ -19,8 +19,8 @@ declare module '@vue/runtime-core' {
 // const api = axios.create({ baseURL: 'http://localhost:3000/api/' });
 // const loginApi = axios.create({ baseURL: 'http://localhost:3000/api/' });
 
-const api = axios.create({ baseURL: 'https://library-backend-y0o3.onrender.com/api/' });
-const loginApi = axios.create({ baseURL: 'https://library-backend-y0o3.onrender.com/api/' });
+const api = axios.create({ baseURL: 'https://library-backend-cmg9.onrender.com/api/' });
+const loginApi = axios.create({ baseURL: 'https://library-backend-cmg9.onrender.com//api/' });
 
 // const api = axios.create({
 //   baseURL: 'https://cpc-repo-production.up.railway.app/api/',

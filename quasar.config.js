@@ -198,9 +198,6 @@ module.exports = configure(function (/* ctx */) {
         win: {
           target: "nsis",
         },
-        linux: {
-          target: ["snap", "AppImage","deb","rpm"]
-        }
       },
     },
 
