@@ -1,4 +1,3 @@
-
 import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
 import path from 'path';
 import os from 'os';
