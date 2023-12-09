@@ -178,6 +178,9 @@ module.exports = configure(function (/* ctx */) {
       bundler: 'builder', // 'packager' or 'builder'
 
       packager: {
+
+        platform: 'win32'
+
         // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
         // OS X / Mac App Store
         // appBundleId: '',
@@ -191,7 +194,10 @@ module.exports = configure(function (/* ctx */) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'cpc-library-electron',
+        appId: 'cpc-library',
+        win: {
+          target: "win32",
+        },
       },
     },
 
