@@ -56,7 +56,7 @@ const chartOptions = {
     curve: 'smooth'
   },
   title: {
-    text: 'Average High & Low Temperature',
+    text: 'Fines and Fees',
     align: 'left'
   },
   grid: {

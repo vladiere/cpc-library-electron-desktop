@@ -40,6 +40,19 @@
                     />
                   </q-item-section>
 
+                  <!-- <q-item-section side> -->
+                  <!--   <q-icon v-if="!loading" name="mdi-trash-can" size="2em" color="red-5" class="cursor-pointer" @click="readAllNotifications"> -->
+                  <!--     <q-tooltip class="bg-grey-10 text-grey-2" :delay="300"> -->
+                  <!--       Clear all -->
+                  <!--     </q-tooltip> -->
+                  <!--   </q-icon> -->
+                  <!--   <q-spinner-tail -->
+                  <!--     v-else -->
+                  <!--     color="primary" -->
+                  <!--     size="2em" -->
+                  <!--   /> -->
+                  <!-- </q-item-section> -->
+
                   <q-item-section side>
                     <q-icon v-if="!loading" name="mdi-broom" size="2em" color="blue-9" class="cursor-pointer" @click="readAllNotifications">
                       <q-tooltip class="bg-grey-10 text-grey-2" :delay="300">
@@ -137,7 +150,6 @@ import ListNotifications, {
 } from 'src/components/Notify/ListNotifications.vue';
 import jwt_decode from 'jwt-decode';
 import { socket } from 'src/utils/socket';
-import books from 'src/utils/books';
 
 const route = useRoute();
 const routeName = ref<unknown>('');
@@ -278,7 +290,6 @@ const readAllNotifications = async () => {
 
 onMounted(async () => {
   loading.value = true;
-  await books.getAllContributorsBooks();
   await checkLibrarianIsAdmin();
   await librarianNotifications();
 

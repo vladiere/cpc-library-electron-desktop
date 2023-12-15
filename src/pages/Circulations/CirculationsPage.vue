@@ -89,6 +89,7 @@ const Renewal = defineAsyncComponent({
 
 const getCirculations = debounce(async() => {
   try {
+    await circulations.calculateFinesFees();
     await circulations.getCirculations();
   } catch (error) {
     throw error;

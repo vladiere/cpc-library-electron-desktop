@@ -10,7 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, defineAsyncComponent } from 'vue';
+import { defineComponent, defineAsyncComponent, onMounted } from 'vue';
+import books from 'src/utils/books';
 
 defineComponent({
   name: 'TableListPage',
@@ -35,4 +36,8 @@ const EbooksRecords = defineAsyncComponent({
   timeout: 2300,
   suspensible: true
 });
+
+onMounted(async() => {
+  await books.getAllContributorsBooks();
+})
 </script>

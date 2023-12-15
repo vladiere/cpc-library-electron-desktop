@@ -79,17 +79,17 @@ const trend_books = ref([]);
 
 const cardsComponent = ref<CardsProps[]>([
   {
-    title: 'Fines & Fees',
+    title: 'Borrowed books',
     icon: 'mdi-cached',
-    img: 'mdi-currency-php',
+    img: 'mdi-calendar-sync-outline',
     label: 'Updated now',
-    count: computed(() => cards_value.value.totalAmount) | 0,
+    count: computed(() => cards_value.value.totalAmount) || 0,
     loading: isLoading,
   },
   {
-    title: 'new register',
+    title: 'Unreturned',
     icon: 'mdi-cached',
-    img: 'mdi-account-multiple-plus',
+    img: 'mdi-book-refresh-outline',
     label: 'Updated now',
     count: computed(() => cards_value.value.totalRegister),
     loading: isLoading,
@@ -138,6 +138,7 @@ const getDashboard = debounce(async () => {
 onMounted(async () => {
   isLoading.value = true;
   await getDashboard();
+
   await socket.on('new_connected', (data) => {
     if (data) {
       cards_value.value.totalActive += 1;

@@ -113,6 +113,7 @@ const contributelist = computed(() => {
 
 onMounted(() => {
   contributeHistory.value = bookStore.getEbooks;
+  console.log(contributeHistory.value)
 
   contributeHistory.value.map((item) => {
     const temp = item.category_name.split(', ');

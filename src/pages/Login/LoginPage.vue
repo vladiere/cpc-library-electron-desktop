@@ -134,7 +134,7 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   socket.on(connect => {
-    console.log('connected')
+    console.log(connect)
   })
 })
 </script>

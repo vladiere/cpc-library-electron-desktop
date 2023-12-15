@@ -65,6 +65,7 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import { useUserStore } from 'stores/user-store';
 import { debounce } from 'quasar';
+import { api } from 'quasar';
 
 defineComponent({
   name: 'UsersTable',
@@ -129,12 +130,17 @@ const columns: unknown = [
 const rows = ref<UserDetails>([]);
 
 const getAllusers = debounce(() => {
-  rows.value = userStore.getUsers;
-  rows.value.map((item: unknown) => {
-    const index = options.value.indexOf(item.department.toUpperCase());
-    if (index === -1) options.value.push(item.department.toUpperCase());
-  });
-  isLoading.value = false;
+  try {
+    rows.value = userStore.getUsers;
+    rows.value.map((item: unknown) => {
+      const index = options.value.indexOf(item.department.toUpperCase());
+      if (index === -1) options.value.push(item.department.toUpperCase());
+    })
+  } catch (error) {
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
 }, 1500)
 
 onMounted(() => {

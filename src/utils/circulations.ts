@@ -4,6 +4,18 @@ import { LocalStorage } from 'quasar';
 
 const circulationStore = useCirculationStore();
 
+const calculateFinesFees = async () => {
+  try {
+    await api.get('/get/finesfees', {
+      headers: {
+        Authorization: `Bearer ${LocalStorage.getItem('token')}`
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+
 const getCirculations = async () => {
   try {
       const response = await api.get('/transactions/all', {
@@ -19,4 +31,5 @@ const getCirculations = async () => {
 
 export default {
   getCirculations,
+  calculateFinesFees,
 }

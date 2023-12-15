@@ -44,10 +44,10 @@
           outlined
           v-model="form.accession_date"
           label="Date"
+          readonly
           lazy-rules
           :rules="[
             (val) => (val && val.length > 0) || 'Enter the date of purchase',
-            (val) => isValidDate(val) || 'Enter a valid date',
           ]"
         >
           <template v-slot:append>
@@ -86,8 +86,7 @@
           v-model="form.condition"
           lazy-rules
           :rules="[
-            (val) =>
-              (val && val.length > 0) || 'Enter the condition of the book',
+            (val) => (val && val.length > 0) || 'Enter the condition of the book',
           ]"
         />
       </div>
@@ -124,7 +123,6 @@ import BookPurchase, {
 } from 'src/components/Acquisitions/BookPurchase.vue';
 import { api } from 'src/boot/axios';
 import { Notify, LocalStorage } from 'quasar';
-import isValidDate from 'src/functions/isValidDate';
 
 defineComponent({
   name: 'BookPurchaseComponent',
@@ -142,7 +140,7 @@ const form = ref({
 
 const onSuccess = () => {
   for (const key in form.value) {
-    form.value[key as keyof typeof form.value] = '';
+    form.value[key as keyof typeof form.value] = null;
   }
 };
 

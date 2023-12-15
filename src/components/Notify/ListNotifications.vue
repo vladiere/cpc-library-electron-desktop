@@ -2,7 +2,7 @@
     <q-item clickable v-ripple :class="status === 'unread' ? 'text-bold' : ''">
       <q-item-section>
         <q-item-label :class="status ==='unread' ? 'text-grey-10' : 'text-grey-8'">{{ fullname }}</q-item-label>
-        <q-item-label caption >{{ message }}</q-item-label>
+        <q-item-label :caption="status === 'read'" >{{ message }}</q-item-label>
       </q-item-section>
 
       <q-item-section side top>

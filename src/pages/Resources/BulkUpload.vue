@@ -4,7 +4,7 @@
     <q-btn label="Back" icon="mdi-keyboard-return" flat dense to="/resources" />
     <div v-if="dataToSend.length === 0" class="column items-center">
       <q-uploader
-        url="https://library-backend-y0o3.onrender.com/api/upload/excel"
+        url="http://localhost:3000/api/upload/excel"
         label="Upload Excel File"
         color="primary"
         field-name="exceldata"
