@@ -65,7 +65,6 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import { useUserStore } from 'stores/user-store';
 import { debounce } from 'quasar';
-import { api } from 'quasar';
 
 defineComponent({
   name: 'UsersTable',
