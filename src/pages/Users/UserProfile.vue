@@ -8,7 +8,7 @@
         >
           <q-card class="column justify-center" flat>
             <q-img
-              src="src/assets/backgrounds/bg.jpg"
+              src="~assets/backgrounds/bg.jpg"
               height="430px"
               fit="fill"
             />

@@ -204,6 +204,7 @@ module.exports = configure(function (/* ctx */) {
             "rpm",
             "deb",
             "snap",
+
           ]
         }
       },
