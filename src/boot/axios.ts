@@ -34,17 +34,6 @@ const refreshToken = async () => {
   }
 };
 
-api.interceptors.request.use(
-  config => {
-    if (!config.headers['Authorization']) {
-       config.headers['Authorization'] = `Bearer ${LocalStorage.getItem('token')}`;
-    }
-
-    return config;
-  }, (error) => Promise.reject(error)
-)
-
-
 api.interceptors.response.use(
   response => response,
   async (error) => {
