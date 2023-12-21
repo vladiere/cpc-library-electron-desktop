@@ -211,24 +211,25 @@
             v-model="form.description"
           />
         </div>
-        <div class="col column text-capitalize">
-          <q-item-label>Privilege</q-item-label>
-          <div class="col row">
-            <q-select
-              class="col-4"
-              clearable
-              outlined
-              v-model="form.privilege"
-              lazy-rules
-              :rules="[
-                (val) =>
-                  (val && val.length > 0) || 'Please enter the privilege',
-              ]"
-              :options="options"
-              label="Privilege"
-            />
-          </div>
-        </div>
+        <!-- <div class="col column text-capitalize"> -->
+        <!--   <q-item-label>Privilege</q-item-label> -->
+        <!--   <div class="col row"> -->
+        <!--     <q-select -->
+        <!--       class="col-4" -->
+        <!--       clearable -->
+        <!--       outlined -->
+        <!--       options-cover -->
+        <!--       v-model="form.privilege" -->
+        <!--       lazy-rules -->
+        <!--       :rules="[ -->
+        <!--         (val) => -->
+        <!--           (val && val.length > 0) || 'Please enter the privilege', -->
+        <!--       ]" -->
+        <!--       :options="options" -->
+        <!--       label="Privilege" -->
+        <!--     /> -->
+        <!--   </div> -->
+        <!-- </div> -->
         <q-btn
           label="Register"
           color="primary"
@@ -270,7 +271,7 @@ const form = ref({
 
   hobbies: '',
   description: '',
-  privilege: '',
+  privilege: 'staff',
 });
 
 const options = ['tech coordinator', 'assistant', 'vendor'];
