@@ -34,6 +34,17 @@ const refreshToken = async () => {
   }
 };
 
+api.interceptors.request.use(
+  config => {
+    if (!config.headers['Authorization']) {
+       config.headers['Authorization'] = `Bearer ${LocalStorage.getItem('token')}`;
+    }
+
+    return config;
+  }, (error) => Promise.reject(error)
+)
+
+
 api.interceptors.response.use(
   response => response,
   async (error) => {
@@ -49,6 +60,7 @@ api.interceptors.response.use(
         // console.log('Token refreshed successfully. Retrying the previous request.');
         prevRequest.headers['Authorization'] = `Bearer ${token.accessToken}`;
 
+        LocalStorage.remove('token');
         LocalStorage.set('token', token.accessToken);
         return api(prevRequest);
       } else {
