@@ -30,51 +30,65 @@ const refreshToken = async () => {
 
     return response.data;
   } catch (error) {
-    throw error;
+    console.error('Failed to refresh token.', error);
+    throw error; // Ensure to propagate the error so that it can be handled in the interceptor
   }
 };
 
+let isRefreshing = false;
+
 api.interceptors.request.use(
-  config => {
+  (config) => {
     if (!config.headers['Authorization']) {
-       config.headers['Authorization'] = `Bearer ${LocalStorage.getItem('token')}`;
+      config.headers['Authorization'] = `Bearer ${LocalStorage.getItem('token')}`;
     }
 
     return config;
-  }, (error) => Promise.reject(error)
-)
-
+  },
+  (error) => Promise.reject(error)
+);
 
 api.interceptors.response.use(
-  response => response,
+  (response) => response,
   async (error) => {
     const prevRequest = error?.config;
 
     if (error?.response.status === 401 && !prevRequest?.sent) {
-      // console.log('Unauthorized error. Attempting to refresh token.');
-      prevRequest.sent = true;
-      const token = await refreshToken();
-      // console.log('Refresh token response:', token);
+      if (!isRefreshing) {
+        isRefreshing = true;
 
-      if (token.accessToken) {
-        // console.log('Token refreshed successfully. Retrying the previous request.');
-        prevRequest.headers['Authorization'] = `Bearer ${token.accessToken}`;
+        try {
+          const token = await refreshToken();
 
-        LocalStorage.remove('token');
-        LocalStorage.set('token', token.accessToken);
-        return api(prevRequest);
+          if (token.accessToken) {
+            prevRequest.headers['Authorization'] = `Bearer ${token.accessToken}`;
+
+            LocalStorage.remove('token');
+            LocalStorage.set('token', token.accessToken);
+            prevRequest.sent = true; // Mark the request as sent to prevent further loops
+            isRefreshing = false; // Reset isRefreshing flag
+
+            return api(prevRequest);
+          } else {
+            console.error('Failed to refresh token. Redirect to login or handle accordingly.');
+            isRefreshing = false; // Reset isRefreshing flag
+            return Promise.reject(error);
+          }
+        } catch (refreshError) {
+          console.error('Error in refreshToken', refreshError);
+          isRefreshing = false; // Reset isRefreshing flag
+          return Promise.reject(error);
+        }
       } else {
-        // console.error('Failed to refresh token. Redirect to login or handle accordingly.');
-        // Handle the case where token refresh fails (e.g., redirect to login)
-        return Promise.reject(error);
+        // If isRefreshing is true, wait for the token refresh to complete
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust the delay if needed
+        return api(prevRequest);
       }
     }
 
     return Promise.reject(error);
   }
 );
-
-
 
 export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
